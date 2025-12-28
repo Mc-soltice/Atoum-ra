@@ -1,7 +1,7 @@
 
-
 import Footer from "@/components/customer/Footer";
 import Header from "@/components/customer/Header";
+import ClientContent from "./ClientContent";
 
 export const metadata = {
   title: {
@@ -21,20 +21,18 @@ export const metadata = {
 
 export default function CustomerLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <div>
-      <body className="min-h-screen flex flex-col">
-        <Header />
-
-        <main className="flex-1 container mx-auto px-4">
-          {children}
-        </main>
-
-        <Footer />
-      </body>
+    <div className="bg-white">
+      <Header />
+      {/* On enveloppe les enfants avec le composant client */}
+      <ClientContent>
+        {children}
+      </ClientContent>
+      <Footer />
     </div>
   );
 }
+

@@ -1,8 +1,23 @@
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// app/layout.tsx
+"use client"; // On doit passer en client component
+
+import { useEffect } from "react";
+import "./globals.css";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    // Supprime l'attribut ajouté par les extensions navigateur
+    document.body.removeAttribute("cz-shortcut-listen");
+  }, []);
+
   return (
     <html lang="fr">
       <body className="min-h-screen">
-        {children} {/* Ici on laisse l’espace pour tous les layouts imbriqués */}
+        {children}
       </body>
     </html>
   );
