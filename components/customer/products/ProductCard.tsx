@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart } from "@/contexte/panier/CartContext";
 import { Product } from "@/types/product";
 import { ShoppingBag } from "lucide-react";
 import Image from "next/image";
@@ -33,49 +34,51 @@ export default function ProductCard({ product, modalId }: Props) {
     modal?.showModal();
   };
 
+  // ✅ Connexion au panier
+  const { addToCart } = useCart();
+
+  // ✅ Action unique du bouton
+  const handleAddToCart = () => {
+    if (!isAvailable) return;
+
+    addToCart(product, 1); // 👉 ajout réel au panier
+    openModal();           // 👉 ouverture du modal (inchangé)
+  };
+
   return (
     <div
       className="
-        group relative h-[390px] w-[280px]
-        overflow-hidden rounded-xl
-        bg-white/80 backdrop-blur-xl
-        shadow-lg transition-all duration-500
-        hover:shadow-2xl hover:-translate-y-1
-        flex flex-col
+        group relative overflow-hidden rounded-lg
+        bg-white shadow-sm border border-gray-100
+        transition-shadow duration-300
+        hover:shadow-md
+        flex flex-col p-3
       "
     >
       {/* ================= IMAGE + NAVIGATION ================= */}
-      {/* 
-        Link Next.js :
-        - SEO friendly
-        - Préchargement automatique
-        - Accessibilité améliorée
-      */}
       <Link
         href={`/produits/${product.id}`}
         aria-label={`Voir les détails du produit ${product.name}`}
-        className="relative h-[60%] w-full overflow-hidden rounded-t-xl"
+        className="relative aspect-square w-full overflow-hidden rounded-md mb-2"
       >
         <Image
           src={product.image}
           alt={`Image du produit naturel ${product.name}`}
           fill
           className="
-            object-cover transition-transform duration-700
-            group-hover:scale-110
+            object-cover transition-opacity duration-300
+            group-hover:opacity-90
           "
-          priority
         />
 
         {/* Badge disponibilité */}
         {isAvailable && (
           <span
             className="
-              absolute top-4 left-4
-              px-4 py-1 rounded-full
+              absolute top-2 left-2
+              px-2 py-1 rounded
               text-xs font-semibold text-white
-              bg-emerald-500/90 backdrop-blur
-              shadow-md
+              bg-emerald-500
             "
           >
             Disponible
@@ -84,41 +87,35 @@ export default function ProductCard({ product, modalId }: Props) {
       </Link>
 
       {/* ================= CONTENU TEXTE ================= */}
-      <div className="flex flex-col flex-1 min-h-0 p-5">
+      <div className="flex flex-col flex-1 min-h-0">
         <div className="flex-1">
-          {/* Titre SEO (h2 car liste de produits) */}
-          <h2 className="text-base font-semibold tracking-wide text-gray-900">
+          {/* Titre SEO */}
+          <h2 className="text-xs font-medium text-gray-900 line-clamp-2 mb-1">
             {product.name}
           </h2>
 
-          {/* Description courte */}
-          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-            {product.description}
-          </p>
-
           {/* Prix */}
-          <div className="mt-2 text-lg font-bold text-red-600">
+          <div className="text-xs text-gray-500 mt-1">
             {product.price.toLocaleString()} FCFA
           </div>
         </div>
 
         {/* ================= ACTION ================= */}
-        <div className="flex justify-end mt-2 ">
+        <div className="mt-3">
           <button
-            onClick={openModal}
+            onClick={handleAddToCart}
             disabled={!isAvailable}
             aria-disabled={!isAvailable}
             className={`
-              w-full px-4 py-2 rounded-xl text-sm font-medium
-              transition-all flex items-center justify-center gap-2
-              shadow-md hover:shadow-lg
+              w-full px-3 py-1.5 rounded-md text-3xs font-medium
+              transition-colors flex items-center justify-center gap-1
               ${isAvailable
-                ? "bg-gradient-to-r from-[#BBCB64] to-[#A4BB64] text-white hover:from-[#A0B84F] hover:to-[#8FAE3F]"
+                ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }
             `}
           >
-            <ShoppingBag className="h-5 w-5" />
+            <ShoppingBag />
             <span>Ajouter</span>
           </button>
         </div>

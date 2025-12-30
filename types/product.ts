@@ -24,3 +24,6 @@ export interface ProductPromo {
   usage?: string;
   stock: number;
 }
+// types/product.ts
+export type BaseProduct = Product | ProductPromo;
+

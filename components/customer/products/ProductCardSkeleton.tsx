@@ -1,38 +1,33 @@
+"use client";
+
 export default function ProductCardSkeleton() {
   return (
     <div
       className="
-        relative
-        h-[390px]
-        w-[280px]
-        overflow-hidden
-        rounded-xl
-        bg-white/80
-        backdrop-blur-xl
-        shadow-lg
+      skeleton
+        relative overflow-hidden rounded-lg
+        bg-white shadow-sm border border-gray-100
+        flex flex-col p-3
         animate-pulse
-        flex
-        flex-col
       "
     >
-      {/* IMAGE (60%) */}
-      <div className="h-[60%] w-full bg-gray-200" />
+      {/* ================= IMAGE ================= */}
+      <div className="relative aspect-square w-full rounded-md bg-gray-200 mb-2" />
 
-      {/* CONTENU */}
-      <div className="flex flex-col flex-1 min-h-0 p-4">
-        {/* Texte */}
+      {/* ================= CONTENU TEXTE ================= */}
+      <div className="flex flex-col flex-1 min-h-0">
         <div className="flex-1 space-y-2">
-          <div className=" skeleton h-3 w-3/4 bg-gray-200 rounded-xl" />
-          <div className=" skeleton h-2 w-full bg-gray-200 rounded-xl" />
-          <div className=" skeleton h-2 w-5/6 bg-gray-200 rounded-xl" />
+          {/* Titre */}
+          <div className="h-3 bg-gray-200 rounded w-5/6" />
+          <div className="h-3 bg-gray-200 rounded w-4/6" />
 
           {/* Prix */}
-          <div className=" skeleton h-5 w-1/3 bg-gray-200 rounded-full mt-3" />
+          <div className="h-3 bg-gray-200 rounded w-2/6 mt-2" />
         </div>
 
-        {/* Bouton */}
-        <div className="mt-4">
-          <div className=" skeleton h-10 w-full bg-gray-300 rounded-xl mb-5" />
+        {/* ================= BOUTON ================= */}
+        <div className="mt-3">
+          <div className="w-full h-8 rounded-md bg-gray-200" />
         </div>
       </div>
     </div>

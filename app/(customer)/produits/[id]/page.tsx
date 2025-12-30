@@ -47,7 +47,7 @@ export default async function ProductDetail({ params }: ProductDetailProps) {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <main className="max-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* ================= CONTENEUR PRINCIPAL (60% DE LARGEUR) ================= */}
       <div className="container mx-auto px-4 py-6 md:px-6 max-w-4xl">
         {/* ================= FIL D'ARIANE DE NAVIGATION ================= */}
@@ -110,11 +110,11 @@ export default async function ProductDetail({ params }: ProductDetailProps) {
                     </span>
 
                     {/* cas de la promo */}
-                    {/* {product.originalPrice && product.originalPrice > product.price && (
+                    {product.originalPrice && product.originalPrice > product.price && (
                       <span className="ml-2 text-lg text-gray-400 line-through">
                         €{product.originalPrice.toFixed(2)}
                       </span>
-                    )} */}
+                    )}
                   </div>
 
                   {/* Indicateur de stock */}
@@ -139,11 +139,11 @@ export default async function ProductDetail({ params }: ProductDetailProps) {
                 </div>
 
                 {/* BADGE PROMOTION (si applicable) */}
-                {/* {product.originalPrice && product.originalPrice > product.price && (
+                {product.originalPrice && product.originalPrice > product.price && (
                   <div className="inline-block px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold rounded-full">
                     Économisez {Math.round((1 - product.price / product.originalPrice) * 100)}%
                   </div>
-                )} */}
+                )}
               </div>
 
               {/* ================= DESCRIPTION COURTE ================= */}
@@ -190,7 +190,8 @@ export default async function ProductDetail({ params }: ProductDetailProps) {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {/* Bouton Ajouter au panier */}
                   <button
-                    className="btn rounded-lg bg-gradient-to-r from-[#BBCB64] to-[#A4BB64] text-white flex-1 py-3 text-base hover:from-[#A4BB64] hover:to-[#8DAB64] transition-all duration-300 shadow-sm hover:shadow"
+                    // className="btn rounded-lg bg-gradient-to-r from-[#BBCB64] to-[#A4BB64] text-white flex-1 py-3 text-base hover:from-[#A4BB64] hover:to-[#8DAB64] transition-all duration-300 shadow-sm hover:shadow"
+                    className="btn rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white flex-1 py-3 text-base hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-sm hover:shadow"
                     disabled={product.stock === 0}
                   >
                     <ShoppingCart className="inline-block mr-2 w-5 h-5" />

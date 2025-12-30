@@ -1,8 +1,8 @@
+import ClientLayout from "@/components/providers/ClientLayout";
 
-import Footer from "@/components/customer/Footer";
-import Header from "@/components/customer/Header";
-import ClientContent from "./ClientContent";
-
+/**
+ * Métadonnées SEO (SERVER SIDE ✅)
+ */
 export const metadata = {
   title: {
     default: "Atoum-ra | Produits naturels authentiques",
@@ -21,18 +21,14 @@ export const metadata = {
 
 export default function CustomerLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <div className="bg-white">
-      <Header />
-      {/* On enveloppe les enfants avec le composant client */}
-      <ClientContent>
-        {children}
-      </ClientContent>
-      <Footer />
-    </div>
+    <html lang="fr">
+      <body className="bg-white">
+        <ClientLayout>{children}</ClientLayout>
+      </body>
+    </html>
   );
 }
-
