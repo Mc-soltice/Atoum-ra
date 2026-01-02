@@ -4,13 +4,12 @@ import { useCart } from "@/contexte/panier/CartContext"; // Importez le contexte
 import { Logs, Search, ShoppingCart, UserRoundPlus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Utilisez le contexte du panier
   const { getTotalItems } = useCart();
@@ -40,8 +39,8 @@ export default function Header() {
   const navItems = [
     { href: "/", label: "Accueil" },
     { href: "/produits", label: "Produits" },
-    { href: "/categories", label: "Catégories" },
-    { href: "/promotions", label: "Promotions", highlight: true }
+    { href: "/promotions", label: "Promotions", highlight: true },
+    { href: "/about", label: "A Propos" }
   ];
 
   return (

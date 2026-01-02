@@ -1,7 +1,9 @@
 "use client";
 
+import CartSlider from "@/components/customer/productCategorie/CartSlider";
 import { Product } from "@/types/product";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import CategoryBannerSkeleton from "./CategoryBannerSkeleton";
 import ProductCard from "./ProductCard";
@@ -16,13 +18,14 @@ interface Props {
 export default function ProductCategoryRow({
   category,
   products,
-  modalId = "product-modal"
 }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState(4);
   const [cardWidth, setCardWidth] = useState(298);
   const [containerWidth, setContainerWidth] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
+  const [isCartSliderOpen, setIsCartSliderOpen] = useState(false);
+
 
   // S'assurer que le composant est monté côté client
   useEffect(() => {
@@ -79,6 +82,16 @@ export default function ProductCategoryRow({
   const canScrollLeft = currentIndex > 0;
   const canScrollRight = currentIndex < products.length - visibleCards;
 
+  // slide panier 
+  const openCartSlider = () => {
+    setIsCartSliderOpen(true);
+  };
+
+  const closeCartSlider = () => {
+    setIsCartSliderOpen(false);
+  };
+  const router = useRouter();
+  const url = "/produits";
 
   // Afficher le skeleton tant que le composant charge encore côté client
   if (!isMounted) {
@@ -117,7 +130,7 @@ export default function ProductCategoryRow({
 
 
   return (
-    <div className="w-full py-8">
+    <div className="w-full py-3">
       {/* Bannière de catégorie */}
       <div className="w-full bg-gradient-to-r from-[#F29820] to-[#F2B820] text-white flex items-center justify-between px-4 py-3 mb-6">
         <div className="flex items-center space-x-4">
@@ -128,7 +141,9 @@ export default function ProductCategoryRow({
           </span>
         </div>
 
-        <button className="flex items-center space-x-2 text-white hover:text-gray-100 font-medium transition-colors">
+        <button onClick={() => router.push(url)}
+          className="flex items-center space-x-2 text-white hover:text-gray-100 font-medium transition-colors"
+        >
           <span>Voir tout</span>
           <ChevronRight className="h-4 w-4 animate-bounce-right" />
         </button>
@@ -194,8 +209,9 @@ export default function ProductCategoryRow({
                 style={{ width: '290px' }}
               >
                 <ProductCard
+                  key={product.id}
                   product={product}
-                  modalId={`${modalId}-${product.id}`}
+                  onCartClick={openCartSlider}
                 />
               </div>
             ))}
@@ -263,6 +279,12 @@ export default function ProductCategoryRow({
           ))}
         </div>
       )}
+
+      {/* ================= SLIDER DU PANIER ================= */}
+      <CartSlider
+        isOpen={isCartSliderOpen}
+        onClose={closeCartSlider}
+      />
     </div>
   );
 }

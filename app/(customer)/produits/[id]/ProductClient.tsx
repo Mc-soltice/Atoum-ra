@@ -1,16 +1,20 @@
 // app/products/[id]/ProductClient.tsx
 'use client';
 
+import { useCart } from '@/contexte/panier/CartContext';
 import { Product } from '@/types/product';
 import { Headset, Share2, ShieldCheck, TruckElectric } from 'lucide-react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface ProductClientProps {
   product: Product;
+  onCartOpen?: () => void; // Callback pour ouvrir le slider
 }
 
-export default function ProductClient({ product }: ProductClientProps) {
+export default function ProductClient({ product, onCartOpen }: ProductClientProps) {
   const [showShareSuccess, setShowShareSuccess] = useState(false);
+  const { addToCart, canAddToCart } = useCart();
 
   // ================= FONCTION DE PARTAGE =================
   const handleShare = async () => {
@@ -34,9 +38,18 @@ export default function ProductClient({ product }: ProductClientProps) {
 
   // ================= FONCTION AJOUT PANIER =================
   const handleAddToCart = () => {
-    // Logique d'ajout au panier
-    console.log('Ajout au panier:', product);
-    // Ici vous intégrerez votre state management (Redux, Context, etc.)
+    if (!canAddToCart(product.id, 1)) {
+      toast.error(`Stock insuffisant pour ${product.name}. Disponible: ${product.stock} unités`);
+      return;
+    }
+
+    // Ajouter au panier
+    addToCart(product, 1);
+
+    // Ouvrir le slider si la fonction est fournie
+    if (onCartOpen) {
+      onCartOpen();
+    }
   };
 
   return (
@@ -96,9 +109,9 @@ export default function ProductClient({ product }: ProductClientProps) {
 
           <div className="flex items-center gap-4 mb-4">
             <span className="text-2xl font-bold text-primary" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              <span itemProp="priceCurrency" content="EUR">€</span>
+              <span itemProp="priceCurrency" content="XOF">FCFA</span>
               <span itemProp="price" content={product.price.toString()}>
-                {product.price.toFixed(2)}
+                {product.price.toLocaleString()}
               </span>
             </span>
 
@@ -161,7 +174,7 @@ export default function ProductClient({ product }: ProductClientProps) {
         <div className="pt-6">
           <button
             onClick={handleAddToCart}
-            className="btn btn-primary btn-lg w-full"
+            className="btn btn-primary btn-lg w-full hover:scale-105 transition-transform duration-200"
             disabled={product.stock === 0}
             aria-label={`Ajouter ${product.name} au panier`}
           >

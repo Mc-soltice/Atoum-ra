@@ -1,22 +1,35 @@
-// components/ProductCard.tsx
+// components/prodcuts/ProductCard.tsx
 "use client";
+import { useCart } from "@/contexte/panier/CartContext";
+
 import { ProductPromo } from "@/types/product";
 import { ShoppingBag } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Props {
   product: ProductPromo;
-  modalId: string;
+  onCartClick?: () => void;
 }
 
-export default function PromoCard({ product, modalId }: Props) {
+export default function PromoCard({ product, onCartClick }: Props) {
   const isAvailable = product.stock > 0;
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const { addToCart } = useCart();
 
-  const openModal = () => {
-    const modal = document.getElementById(modalId) as HTMLDialogElement;
-    modal?.showModal();
+
+  const handleAddToCart = () => {
+
+    if (!isAvailable) return;
+
+    addToCart(product, 1);
+
+    // Ouvre le slider si la fonction est fournie
+    if (onCartClick) {
+      onCartClick();
+    }
   };
+
 
   return (
     <div
@@ -39,31 +52,30 @@ export default function PromoCard({ product, modalId }: Props) {
       "
     >
       {/* ✅ IMAGE CLIQUABLE */}
-      <figure
-        onClick={openModal}
+      <Link
+        href={`/produits/${product.id}`}
+        aria-label={`Voir les détails de ${product.name}`}
         className="
-          relative
-          h-[60%]
-          w-full
-          overflow-hidden
-          cursor-pointer
-
-        "
+    relative
+    h-[60%]
+    w-full
+    overflow-hidden
+    cursor-pointer
+    block
+  "
       >
         <Image
           src={product.image}
           alt={product.name}
           fill
           className="
-            object-cover
-            transition-transform
-            duration-700
-            group-hover:scale-110
-          rounded-xl
-
-            p-2
-
-          "
+      object-cover
+      transition-transform
+      duration-700
+      group-hover:scale-110
+      rounded-xl
+      p-2
+    "
           priority
         />
 
@@ -71,24 +83,26 @@ export default function PromoCard({ product, modalId }: Props) {
         {hasDiscount && (
           <span
             className="
-              absolute
-              top-4
-              left-4
-              px-4
-              py-1
-              rounded-xl
-              text-xs
-              font-bold
-              text-white
-              bg-red-500/90
-              backdrop-blur
-              shadow-md
-            "
+        absolute
+        top-4
+        left-4
+        px-4
+        py-1
+        rounded-xl
+        text-xs
+        font-bold
+        text-white
+        bg-red-500/90
+        backdrop-blur
+        shadow-md
+        z-10
+      "
           >
             PROMO
           </span>
         )}
-      </figure>
+      </Link>
+
 
       {/* CONTENU */}
       <div className="flex flex-col flex-1 min-h-0 pb-5 px-5">
@@ -132,10 +146,11 @@ export default function PromoCard({ product, modalId }: Props) {
         {/* Bouton orange à droite */}
         <div className="flex justify-end mt-3">
           <button
-            onClick={openModal}
+            onClick={handleAddToCart}
             disabled={!isAvailable}
+            aria-disabled={!isAvailable}
             className={`
-              px-4 py-2 rounded-xl text-sm font-medium transition-all
+              px-4 py-2 rounded-md text-sm font-medium transition-all
               flex items-center justify-center gap-2
               shadow-md hover:shadow-lg
               w-full

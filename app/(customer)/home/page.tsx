@@ -8,7 +8,7 @@ import { PromoProducts } from "@/lib/moks/mockPromo";
 
 export default function Home() {
   return (
-    <div className="px-50 flex flex-col items-center justify-center gap-3.5" >
+    <div className=" flex flex-col items-center justify-center gap-3.5 lg:px-50" >
 
       {/* HERO */}
       <section className="m-[3vh] ">

@@ -102,7 +102,7 @@ export default function CartPage() {
                   <button
                     onClick={handleClearCart}
                     className="w-full py-3 px-4 text-sm font-medium text-red-600 
-                             border border-red-600 rounded-lg hover:bg-red-50 
+                             border border-red-600 rounded-lg hover:bg-red-50  
                              active:bg-red-100 transition-colors"
                   >
                     Vider le panier

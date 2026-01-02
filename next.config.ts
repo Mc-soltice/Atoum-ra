@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   images: {
     domains: ["img.daisyui.com"], // autoriser ce domaine
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+    ]
   },
 };
 
