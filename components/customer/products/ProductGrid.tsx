@@ -13,7 +13,7 @@ export default function ProductGrid() {
   };
 
   return (
-    <div className="space-y-8 md:space-y-12 lg:space-y-16">
+    <div className="space-y-5 md:space-y-12 lg:space-y-16">
       {categories.map(category => {
         const categoryProducts = mockProducts.filter(p => p.category === category);
         if (categoryProducts.length === 0) return null;

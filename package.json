@@ -9,13 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/typeorm": "^11.0.0",
+    "bcrypt": "^6.0.0",
     "daisyui": "^5.5.14",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
+    "mysql2": "^3.16.0",
     "next": "16.0.10",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "react-hot-toast": "^2.6.0"
+    "react-hot-toast": "^2.6.0",
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",

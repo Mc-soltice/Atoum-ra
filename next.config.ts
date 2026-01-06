@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  turbopack: {
+    root: '../../',
+  },
   images: {
     domains: ["img.daisyui.com"], // autoriser ce domaine
     remotePatterns: [

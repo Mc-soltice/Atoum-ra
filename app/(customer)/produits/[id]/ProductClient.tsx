@@ -1,22 +1,27 @@
-// app/products/[id]/ProductClient.tsx
 'use client';
 
-import { useCart } from '@/contexte/panier/CartContext';
-import { Product } from '@/types/product';
-import { Headset, Share2, ShieldCheck, TruckElectric } from 'lucide-react';
+import { useCart } from "@/contexte/panier/CartContext";
+import { Product } from "@/types/product";
+import { Heart, Share2, Shield, ShoppingCart, Truck } from 'lucide-react';
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 
 interface ProductClientProps {
   product: Product;
-  onCartOpen?: () => void; // Callback pour ouvrir le slider
 }
 
-export default function ProductClient({ product, onCartOpen }: ProductClientProps) {
+export default function ProductClient({ product }: ProductClientProps) {
   const [showShareSuccess, setShowShareSuccess] = useState(false);
-  const { addToCart, canAddToCart } = useCart();
+  const [selectedImage, setSelectedImage] = useState(0);
+  const { addToCart } = useCart();
 
-  // ================= FONCTION DE PARTAGE =================
+  // Images de galerie (remplacer par tes vraies images)
+  const productImages = [
+    product.image,
+    product.image, // image secondaire
+    product.image, // autre image
+  ];
+
+  // Fonction de partage
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -36,56 +41,49 @@ export default function ProductClient({ product, onCartOpen }: ProductClientProp
     }
   };
 
-  // ================= FONCTION AJOUT PANIER =================
+  // Fonction ajout panier
   const handleAddToCart = () => {
-    if (!canAddToCart(product.id, 1)) {
-      toast.error(`Stock insuffisant pour ${product.name}. Disponible: ${product.stock} unités`);
-      return;
-    }
-
-    // Ajouter au panier
     addToCart(product, 1);
-
-    // Ouvrir le slider si la fonction est fournie
-    if (onCartOpen) {
-      onCartOpen();
-    }
   };
 
   return (
     <>
-      {/* ================= SECTION GALERIE IMAGE ================= */}
-      <div>
-        <div className="grid grid-cols-3 grid-rows-3 gap-4 mb-6">
-          {/* Image principale */}
-          <div className="col-span-1 row-span-3 relative bg-base-200 rounded-xl overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-base-content/50">Image principale</span>
-            </div>
-          </div>
-
-          {/* Image secondaire */}
-          <div className="col-span-2 row-span-2 relative bg-base-100 rounded-xl overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-base-content/50">Image secondaire</span>
-            </div>
-          </div>
-
-          {/* Autre image */}
-          <div className="col-span-2 relative bg-base-50 rounded-xl overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-base-content/50">Autre image</span>
-            </div>
+      {/* Galerie d'images */}
+      <div className="w-full space-y-4">
+        {/* Image principale */}
+        <div className="aspect-square w-full bg-gradient-to-br from-emerald-50 to-amber-50 rounded-lg flex items-center justify-center border border-emerald-100 overflow-hidden">
+          <div className="text-center p-4">
+            <span className="text-5xl mb-3 block">🌿</span>
+            <p className="text-gray-700 font-medium">Image du produit</p>
+            <p className="text-sm text-gray-500 mt-1">{product.name}</p>
           </div>
         </div>
 
-        {/* Bouton de partage avec feedback */}
+        {/* Miniatures */}
+        <div className="grid grid-cols-3 gap-3">
+          {[0, 1, 2].map((index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedImage(index)}
+              className={`aspect-square bg-gradient-to-br from-amber-50 to-emerald-50 rounded-lg flex items-center justify-center border transition-colors cursor-pointer ${selectedImage === index
+                ? 'border-amber-400 ring-2 ring-amber-200'
+                : 'border-amber-100 hover:border-amber-300'
+                }`}
+            >
+              <span className="text-xl">
+                {index === 0 ? '🖼️' : index === 1 ? '📸' : '🌱'}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Bouton de partage */}
         <button
           onClick={handleShare}
-          className="btn btn-outline btn-primary w-full relative"
+          className="btn btn-outline w-full relative mt-4"
           aria-label="Partager ce produit"
         >
-          <Share2 className="mr-2" />
+          <Share2 className="mr-2 h-4 w-4" />
           Partager ce produit
           {showShareSuccess && (
             <span className="absolute -top-2 -right-2 badge badge-success text-xs">
@@ -95,145 +93,169 @@ export default function ProductClient({ product, onCartOpen }: ProductClientProp
         </button>
       </div>
 
-      {/* ================= SECTION INFORMATIONS PRODUIT ================= */}
-      <div className="space-y-6">
-        {/* En-tête produit */}
-        <header itemScope itemType="https://schema.org/Product">
-          <div className="badge badge-primary mb-2">
-            {product.category}
+      {/* Informations produit */}
+      <div className="w-full space-y-6">
+        {/* En-tête */}
+        <header>
+          <div className="mb-2">
+            <span className="inline-block px-2.5 py-0.5 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-full border border-emerald-200">
+              {product.category}
+            </span>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold mb-3" itemProp="name">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
             {product.name}
           </h1>
-
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-2xl font-bold text-primary" itemProp="offers" itemScope itemType="https://schema.org/Offer">
-              <span itemProp="priceCurrency" content="XOF">FCFA</span>
-              <span itemProp="price" content={product.price.toString()}>
-                {product.price.toLocaleString()}
-              </span>
-            </span>
-
-            {product.stock > 0 ? (
-              <span className="badge badge-success">
-                {product.stock > 10 ? 'En stock' : `Plus que ${product.stock} unités`}
-              </span>
-            ) : (
-              <span className="badge badge-error">Rupture de stock</span>
-            )}
-          </div>
         </header>
 
-        {/* Description produit */}
-        <div className="prose max-w-none">
-          <h2 className="text-xl font-semibold mb-3">Description</h2>
-          <p className="text-base-content/80 leading-relaxed" itemProp="description">
+        {/* Prix et stock */}
+        <div className="p-4 bg-gray-50 rounded-lg border border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <span className="text-2xl font-bold text-amber-700">
+                {product.price.toLocaleString()} FCFA
+              </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <span className="ml-2 text-lg text-gray-400 line-through">
+                  {product.originalPrice.toLocaleString()} FCFA
+                </span>
+              )}
+            </div>
+
+            <div className="text-sm">
+              {product.stock > 10 ? (
+                <span className="flex items-center text-emerald-600">
+                  <span className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></span>
+                  En stock
+                </span>
+              ) : product.stock > 0 ? (
+                <span className="flex items-center text-amber-600">
+                  <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+                  Plus que {product.stock}
+                </span>
+              ) : (
+                <span className="flex items-center text-red-600">
+                  <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                  Rupture
+                </span>
+              )}
+            </div>
+          </div>
+
+          {product.originalPrice && product.originalPrice > product.price && (
+            <div className="inline-block px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold rounded-full mt-2">
+              Économisez {Math.round((1 - product.price / product.originalPrice) * 100)}%
+            </div>
+          )}
+        </div>
+
+        {/* Description */}
+        <div>
+          <p className="text-gray-600 leading-relaxed">
             {product.description}
           </p>
         </div>
 
-        {/* Ingrédients */}
-        {product.ingredients && product.ingredients.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold">Ingrédients</h2>
-            <ul className="space-y-2">
-              {product.ingredients.map((ingredient, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <span>{ingredient}</span>
-                </li>
-              ))}
-            </ul>
+        {/* Caractéristiques */}
+        {(product.ingredients || product.benefits || product.usage) && (
+          <div className="rounded-lg p-4 border border-emerald-100">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Détails</h3>
+
+            {product.ingredients?.slice(0, 3).map((ingredient, index) => (
+              <div key={index} className="flex items-center text-gray-700 mb-2 last:mb-0">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></span>
+                <span className="text-sm">{ingredient}</span>
+              </div>
+            ))}
+
+            {product.benefits?.[0] && (
+              <div className="flex items-center text-gray-700 mt-3 pt-3 border-t border-emerald-100">
+                <Heart className="w-4 h-4 mr-3 text-rose-500" />
+                <span className="text-sm">Aport : {product.benefits[0]}</span>
+              </div>
+            )}
+
+            {product.usage && (
+              <div className="flex items-center text-gray-700 mt-3 pt-3 border-t border-emerald-100">
+                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
+                <span className="text-sm">Prise: {product.usage}</span>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Bienfaits */}
-        {product.benefits && product.benefits.length > 0 && (
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold">Bienfaits</h2>
-            <ul className="space-y-2">
-              {product.benefits.map((benefit, index) => (
-                <li key={index} className="bg-base-200 p-3 rounded-lg">
-                  <strong className="text-primary">✓</strong> {benefit}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Mode d'emploi */}
-        {product.usage && (
-          <div className="space-y-3">
-            <h2 className="text-xl font-semibold">Mode d&apos;emploi</h2>
-            <p className="text-base-content/80">{product.usage}</p>
-          </div>
-        )}
-
-        {/* Bouton d'ajout au panier */}
-        <div className="pt-6">
+        {/* Bouton d'action */}
+        <div>
           <button
             onClick={handleAddToCart}
-            className="btn btn-primary btn-lg w-full hover:scale-105 transition-transform duration-200"
+            className="btn rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white w-full py-3 text-base hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-sm hover:shadow"
             disabled={product.stock === 0}
-            aria-label={`Ajouter ${product.name} au panier`}
           >
-            {product.stock > 0 ? 'Ajouter au panier' : 'Produit indisponible'}
+            <ShoppingCart className="inline-block mr-2 w-5 h-5" />
+            {product.stock === 0 ? 'Rupture' : 'Ajouter au panier'}
           </button>
         </div>
-      </div>
 
-      {/* ================= SECTION GARANTIES ================= */}
-      <div className="mt-12 pt-8 border-t">
-        <div className="flex w-full flex-col lg:flex-row">
-          {/* Paiement sécurisé */}
-          <div className="card bg-base-200 rounded-box grid h-32 grow place-items-center">
-            <div className="text-center p-4">
-              <ShieldCheck className="text-3xl text-primary mx-auto mb-3" />
-              <h3 className="font-bold mb-1">PAIEMENT SÉCURISÉ</h3>
-              <p className="text-sm text-base-content/70">
-                Transactions cryptées SSL pour une protection maximale
-              </p>
+        {/* Garanties */}
+        <div className="border-t border-gray-300 pt-4">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center text-gray-600">
+              <Shield className="w-4 h-4 mr-2 text-emerald-500" />
+              <span>Garantie 30 jours</span>
             </div>
-          </div>
-
-          <div className="divider lg:divider-horizontal">+</div>
-
-          {/* Livraison rapide */}
-          <div className="card bg-base-200 rounded-box grid h-32 grow place-items-center">
-            <div className="text-center p-4">
-              <TruckElectric className="text-3xl text-primary mx-auto mb-3" />
-              <h3 className="font-bold mb-1">LIVRAISON RAPIDE</h3>
-              <p className="text-sm text-base-content/70">
-                Expédition sous 24h et suivi en temps réel
-              </p>
-            </div>
-          </div>
-
-          <div className="divider lg:divider-horizontal">+</div>
-
-          {/* Service après-vente */}
-          <div className="card bg-base-200 rounded-box grid h-32 grow place-items-center">
-            <div className="text-center p-4">
-              <Headset className="text-3xl text-primary mx-auto mb-3" />
-              <h3 className="font-bold mb-1">SERVICE APRÈS-VENTE</h3>
-              <p className="text-sm text-base-content/70">
-                Assistance 7j/7 et satisfaction garantie
-              </p>
+            <div className="flex items-center text-gray-600">
+              <Truck className="w-4 h-4 mr-2 text-blue-500" />
+              <span>Livraison 48h</span>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Micro-données pour SEO */}
-      <div className="sr-only" aria-hidden="true">
-        <span itemProp="brand" itemScope itemType="https://schema.org/Brand">
-          <span itemProp="name">Atoum-ra</span>
-        </span>
-        <span itemProp="sku">{product.id}</span>
-        <span itemProp="availability" content={product.stock > 0 ? "InStock" : "OutOfStock"}>
-          {product.stock > 0 ? 'Disponible' : 'Indisponible'}
-        </span>
+        {/* Sections détaillées */}
+        <div className="pt-6 border-t border-gray-100">
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Ingrédients */}
+              {product.ingredients && product.ingredients.length > 0 && (
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Ingrédients</h3>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    {product.ingredients.map((ingredient, index) => (
+                      <li key={index}>• {ingredient}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Bienfaits */}
+              {product.benefits && product.benefits.length > 0 && (
+                <>
+                  <div className="divider lg:divider-horizontal" />
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Bienfaits</h3>
+                    <ul className="space-y-2 text-sm text-gray-700">
+                      {product.benefits.map((benefit, index) => (
+                        <li key={index}>• {benefit}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </>
+              )}
+
+              {/* Mode d'utilisation */}
+              {product.usage && (
+                <>
+                  <div className="divider lg:divider-horizontal" />
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Mode d'utilisation</h3>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {product.usage}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );

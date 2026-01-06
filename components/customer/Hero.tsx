@@ -1,21 +1,24 @@
-import Image from "next/image"
-
+import Image from "next/image";
 
 export default function Hero() {
-
   return (
-    <div className="hero h-[25vh] mb-10 ">
-      <Image
-        src="/images/Hero.png"
-        alt="Collection Atoum-ra"
-        className="object-cover rounded-4xl"
-        width={1200}
-        height={300}
-      />
-
-    </div>
-  )
-};
-
-
-
+    <section className="w-full">
+      <div className="
+        relative
+        w-full
+        aspect-video [aspectRatio:16/5]
+        max-h-[360px]
+        overflow-hidden
+        rounded-4xl
+      ">
+        <Image
+          src="/images/Hero.png"
+          alt="Collection Atoum-ra"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
+    </section>
+  );
+}

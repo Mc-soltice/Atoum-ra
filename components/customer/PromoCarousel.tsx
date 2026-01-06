@@ -1,9 +1,9 @@
-// components/Carousel3D.tsx
+// components/CarouselSurMesure.tsx
 "use client";
 
 import { ProductPromo } from "@/types/product";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { TouchEvent, useCallback, useEffect, useRef, useState } from 'react';
 import Carousel3DSkeleton from "./products/promotions/Carousel3DSkeleton";
 import PromoCard from "./products/promotions/PromoCard";
 
@@ -17,10 +17,29 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Carousel3D({ products, autoPlay = false, interval = 3000 }: CarouselProps) {
+export default function CarouselSurMesure({ products, autoPlay = false, interval = 5000 }: CarouselProps) {
   const [active, setActive] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isBlinking, setIsBlinking] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [currentX, setCurrentX] = useState(0);
+  const [touchStartTime, setTouchStartTime] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragThreshold = 50;
+  const timeThreshold = 300;
+
+  // Détection mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handlePrevious = useCallback(() => {
     setActive(prev => (prev === 0 ? products.length - 1 : prev - 1));
@@ -30,12 +49,70 @@ export default function Carousel3D({ products, autoPlay = false, interval = 3000
     setActive(prev => (prev === products.length - 1 ? 0 : prev + 1));
   }, [products.length]);
 
+  // Touch handlers
+  const handleTouchStart = (e: TouchEvent) => {
+    setIsPaused(true);
+    setIsDragging(true);
+    setStartX(e.touches[0].clientX);
+    setCurrentX(e.touches[0].clientX);
+    setTouchStartTime(Date.now());
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging) return;
+    setCurrentX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+
+    setIsDragging(false);
+    const deltaX = startX - currentX;
+    const timeElapsed = Date.now() - touchStartTime;
+    const isQuickSwipe = timeElapsed < timeThreshold;
+    const isSignificantSwipe = Math.abs(deltaX) > dragThreshold;
+
+    if (isQuickSwipe && isSignificantSwipe) {
+      if (deltaX > 0) {
+        handleNext();
+      } else {
+        handlePrevious();
+      }
+    }
+
+    if (autoPlay) {
+      setTimeout(() => setIsPaused(false), 1000);
+    }
+  };
+
+  // Mouse wheel pour desktop
+  const handleWheel = useCallback((e: WheelEvent) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      if (e.deltaX > 0) {
+        handleNext();
+      } else {
+        handlePrevious();
+      }
+    }
+  }, [handleNext, handlePrevious]);
+
   useEffect(() => {
-    if (!autoPlay || isPaused) return;
+    const container = containerRef.current;
+    if (!container) return;
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
+
+  // Auto-play
+  useEffect(() => {
+    if (!autoPlay || isPaused || products.length === 0) return;
     const timer = setInterval(handleNext, interval);
     return () => clearInterval(timer);
-  }, [autoPlay, handleNext, interval, isPaused]);
+  }, [autoPlay, handleNext, interval, isPaused, products.length]);
 
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrevious();
@@ -45,177 +122,173 @@ export default function Carousel3D({ products, autoPlay = false, interval = 3000
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handlePrevious, handleNext]);
 
-  // Animation de clignotement pour le titre
-  useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      setIsBlinking(prev => !prev);
-    }, 600); // Clignote toutes les 600ms
+  // Calcul du décalage pour le drag
+  const dragOffset = isDragging ? startX - currentX : 0;
 
-    return () => clearInterval(blinkInterval);
-  }, []);
+  if (!products || products.length === 0) {
+    return (
+      <div className="w-full max-w-6xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Carousel3DSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
+    <div className="w-full max-w-6xl mx-auto px-4 py-1">
+      {/* Header avec navigation */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+        <div className="text-center sm:text-left">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Nos <span className="text-red-600">Promotions</span>
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Découvrez nos offres spéciales à prix réduits
+          </p>
+        </div>
 
-    <div className="w-[72vw] h-[70vh] bg-white rounded-2xl shadow-2xl overflow-hidden px-2 py-1 md:px-8  flex flex-col">
-
-      {/* Titre PROMOTION ! qui clignote - Taille réduite */}
-      <div className="text-center shrink-0">
-
-        <h1 className="
-          relative
-          text-2xl md:text-4xl font-black tracking-wider
-          bg-gradient-to-r from-red-600 via-red-500 to-red-600
-          bg-clip-text text-transparent
-          drop-shadow-lg
-        ">
-          PROMOTION !
-          <span
-            aria-hidden
-            className="
-              pointer-events-none
-              absolute inset-0
-              bg-gradient-to-r from-transparent via-white/40 to-transparent
-              animate-shine
-            "/>
-        </h1>
-
-        <p className="text-gray-600 text-sm md:text-base font-medium">
-          Découvrez nos offres spéciales à prix réduits
-        </p>
-        <div className="flex items-center justify-center mt-1">
-          <div className="w-8 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent rounded-full"></div>
-          <div className="mx-2">
-            <span className="px-2 py-0.5 bg-red-100 text-red-600 rounded-full text-xs font-bold">
-              {products.length} OFFRE{products.length > 1 ? 'S' : ''}
+        <div className="flex items-center gap-4">
+          {/* Compteur */}
+          <div className="px-4 py-2 bg-gray-100 rounded-full">
+            <span className="text-gray-800 font-bold">
+              <span className="text-red-600">{active + 1}</span> / {products.length}
             </span>
           </div>
-          <div className="w-8 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent rounded-full"></div>
+
+          {/* Boutons de navigation */}
+          <div className="flex gap-2">
+            <button
+              onClick={handlePrevious}
+              disabled={active === 0}
+              className={cn(
+                "p-3 rounded-full border transition-all duration-300",
+                active === 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95"
+              )}
+              aria-label="Produit précédent"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleNext}
+              disabled={active === products.length - 1}
+              className={cn(
+                "p-3 rounded-full border transition-all duration-300",
+                active === products.length - 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95"
+              )}
+              aria-label="Produit suivant"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Contenu du carousel */}
-      <div className="relative flex-1 min-h-0">
-        <div
-          className="relative w-full h-full rounded-2xl overflow-hidden"
-          style={{ perspective: '800px' }}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          {/* Navigation - Position optimisée */}
-          <button
-            onClick={handlePrevious}
-            className={cn(
-              "absolute  opacity-70 md:left-4 top-1/2 -translate-y-1/2 z-30 p-2 md:p-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 border-2 border-white text-white hover:from-red-600 hover:to-orange-600 transition-all duration-300 shadow-lg",
-              active === 0 ? "opacity-50 cursor-not-allowed" : "hover:scale-110"
-            )}
-            aria-label="Produit précédent"
-            style={{ backdropFilter: 'blur(8px)' }}
-          >
-            <ChevronLeft className="w-10 h-10 md:w-6 md:h-6 animate-bounce-left" />
-          </button>
-
-          <button
-            onClick={handleNext}
-            className={cn(
-              "absolute opacity-70 right-250 md:right-4 top-1/2 -translate-y-1/2 z-30 p-2 md:p-3 rounded-full bg-gradient-to-r from-red-500 to-orange-500 border-2 border-white text-white hover:from-red-600 hover:to-orange-600 transition-all duration-300 shadow-lg",
-              active === products.length - 1 ? "opacity-50 cursor-not-allowed" : "hover:scale-110"
-            )}
-            aria-label="Produit suivant"
-            style={{ backdropFilter: 'blur(8px)' }}
-          >
-            <ChevronRight className="w-10 h-10 md:w-6 md:h-6 animate-bounce-right" />
-          </button>
-
-          {/* Dots améliorés - Position optimisée */}
-          <div className="absolute bottom-2 md:bottom-1 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-            {products.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setActive(index)}
-                className={cn(
-                  "rounded-full transition-all duration-300 shadow-sm",
-                  index === active
-                    ? "w-6 h-1.5 bg-gradient-to-r from-red-500 to-orange-500"
-                    : "w-1.5 h-1.5 bg-gray-300 hover:bg-gray-400"
-                )}
-                aria-label={`Aller au produit ${index + 1}`}
-              />
-            ))}
-          </div>
-
-          {/* Indicateur de position - Taille réduite */}
-          <div className="absolute top-1 md:top-2 right-1 md:right-2 z-30">
-            <div className="px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full shadow-md">
-              <span className="text-xs font-bold text-gray-800">
-                <span className="text-red-600">{active + 1}</span> / {products.length}
-              </span>
+      {/* Container principal du carousel */}
+      <div
+        ref={containerRef}
+        className="relative"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Indicateur de swipe pour mobile */}
+        {isMobile && (
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-20">
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-gray-200">
+              <ChevronLeft className="w-3 h-3 text-gray-500" />
+              <span className="text-xs text-gray-600">Glisser</span>
+              <ChevronRight className="w-3 h-3 text-gray-500" />
             </div>
           </div>
+        )}
 
-          {/* Cartes des produits - Échelle réduite */}
-          <div className="w-full h-full flex items-center justify-center">
-            {products && products.length > 0
-              ? products.map((product, index) => {
-                const offset = active - index;
-                const absOffset = Math.abs(offset);
-                const direction = Math.sign(offset);
-                const isActive = index === active;
+        {/* Container des cartes */}
+        <div className="relative h-[420px] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white p-4 shadow-lg border border-gray-100">
+          {/* Cartes */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            {products.map((product, index) => {
+              const offset = active - index;
+              const absOffset = Math.abs(offset);
+              const isActive = index === active;
 
-                return (
-                  <div
-                    key={product.id}
-                    className="absolute inset-0 w-full h-full transition-all duration-500 ease-out flex items-center justify-center"
-                    style={{
-                      transformStyle: "preserve-3d",
-                      transform: `
-                      rotateY(${offset * 20}deg)
-                      scale(${1 - absOffset * 0.25})
-                      translateZ(${absOffset * -150}px)
-                      translateX(${direction * -80}px)
-                    `,
-                      opacity: absOffset > 3 ? 0 : 1 - absOffset * 0.35,
-                      filter: `blur(${absOffset * 5}px)`,
-                      zIndex: products.length - absOffset,
-                      pointerEvents: isActive ? "auto" : "none",
-                    }}
-                  >
-                    {/* Utilisation du PromoCard - Échelle réduite */}
-                    <div className="scale-100 md:scale-110 transform-gpu">
-                      <PromoCard
-                        product={product}
-                        modalId={`product-modal-${product.id}`}
-                      />
-                    </div>
-                  </div>
-                );
-              }) : // Si pas de produits, afficher skeletons
-              Array.from({ length: 3 }).map((_, index) => (
+              // Calcul des transformations
+              const scale = 1 - absOffset * 0.1;
+              const opacity = absOffset > 2 ? 0 : 1 - absOffset * 0.3;
+              const translateX = offset * 100;
+              const zIndex = 10 - absOffset;
+              const blur = absOffset * 2;
+
+              // Effet de glissement
+              const dragEffect = isDragging && isActive ? dragOffset * 0.3 : 0;
+
+              return (
                 <div
-                  key={index}
-                  className="absolute inset-0 w-full h-full flex items-center justify-center transition-all duration-500 ease-out"
-                  style={{ transform: "scale(1)" }}
+                  key={product.id}
+                  className="absolute w-full max-w-md transition-all duration-500 ease-out"
+                  style={{
+                    transform: `translateX(${translateX + dragEffect}px) scale(${scale})`,
+                    opacity,
+                    filter: `blur(${blur}px)`,
+                    zIndex,
+                    pointerEvents: isActive ? 'auto' : 'none',
+                    transition: isDragging ? 'none' : 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
                 >
-                  <Carousel3DSkeleton />
+                  <div className="px-4">
+                    <PromoCard product={product} />
+                  </div>
                 </div>
-              ))}
+              );
+            })}
           </div>
-        </div>
-      </div>
 
-      {/* Bandeau promotionnel en bas - Taille réduite */}
-      <div className="mt-1 pt-1 border-t border-gray-200">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-1">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-            <span className="text-gray-700 text-xs md:text-sm">
-              Offres valables jusqu&apos;à épuisement des stocks
-            </span>
-          </div>
-          <div className="flex items-center">
-            <span className="px-2 py-1 bg-red-50 text-red-700 rounded text-xs font-bold border border-red-200">
-              🔥 PROMOS 🔥
-            </span>
-          </div>
+          {/* Overlay de glissement */}
+          {isDragging && dragOffset !== 0 && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+              <div className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500/90 to-orange-500/90 text-white font-medium transform transition-transform duration-200",
+                dragOffset > 0 ? "-translate-x-12" : "translate-x-12"
+              )}>
+                {dragOffset > 0 ? (
+                  <>
+                    <ChevronRight className="w-5 h-5" />
+                    <span className="text-sm font-semibold">Suivant</span>
+                  </>
+                ) : (
+                  <>
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="text-sm font-semibold">Précédent</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Points indicateurs */}
+        <div className="flex justify-center gap-2 mt-8">
+          {products.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActive(index)}
+              className={cn(
+                "rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
+                index === active
+                  ? "w-8 h-2 bg-gradient-to-r from-red-500 to-orange-500"
+                  : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
+              )}
+              aria-label={`Aller au produit ${index + 1}`}
+            />
+          ))}
         </div>
       </div>
     </div>
