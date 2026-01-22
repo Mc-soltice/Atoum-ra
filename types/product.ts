@@ -1,29 +1,93 @@
+import type { Category } from "./category";
+
+/**
+ * Modèle Produit tel que renvoyé par l'API
+ */
 export interface Product {
-  id: string;
+  /** Identifiant unique */
+  id: number;
+
+  /** Nom du produit */
   name: string;
-  category: string;
+
+  /** Catégorie associée */
+  category: Category | null;
+
+  /** Prix actuel */
   price: number;
-  image: string;
-  description: string;
+
+  /** Prix original (avant promotion) */
+  original_price: number | null;
+
+  /** Pourcentage de réduction */
+  discount_percentage?: number;
+
+  /** Image principale */
+  main_image: string;
+
+  /** Galerie d'images */
+  gallery: string[];
+
+  /** Description détaillée */
+  description: string | null;
+
+  /** Liste des ingrédients */
+  ingredients: string[];
+
+  /** Bienfaits */
+  benefits: string[];
+
+  /** Mode d'utilisation */
+  usage: string | null;
+
+  /** Stock disponible */
+  stock: number;
+
+  /** Indique si le produit est promotionnel */
+  is_promotional: boolean;
+
+  /** Indique si la promo est active */
+  is_on_promotion: boolean;
+
+  /** Date de fin de promotion */
+  promo_end_date: string | null;
+
+  /** Indique un stock faible */
+  is_stock_low: boolean;
+
+  /** Indique une rupture de stock */
+  is_out_of_stock: boolean;
+}
+
+/**
+ * Payload création produit
+ */
+export interface CreateProductPayload {
+  name: string;
+  category_id: number;
+  price: number;
+  original_price: number | null;
+
+  description?: string;
   ingredients?: string[];
   benefits?: string[];
   usage?: string;
   stock: number;
+  is_promotional?: boolean;
+  promo_end_date?: string;
 }
 
-export interface ProductPromo {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  originalPrice?: number; // Prix avant réduction (optionnel)
-  image: string;
-  description: string;
-  ingredients?: string[];
-  benefits?: string[];
-  usage?: string;
+/**
+ * Payload mise à jour produit
+ */
+export interface UpdateProductPayload extends Partial<CreateProductPayload> {
+  main_image?: File;
+  images?: File[];
+}
+
+/**
+ * Payload mise à jour du stock
+ */
+export interface UpdateStockPayload {
   stock: number;
 }
-// types/product.ts
-export type BaseProduct = Product | ProductPromo;
-

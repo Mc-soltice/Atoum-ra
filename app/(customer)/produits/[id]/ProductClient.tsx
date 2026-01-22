@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import { useCart } from "@/contexte/panier/CartContext";
 import { Product } from "@/types/product";
-import { Heart, Share2, Shield, ShoppingCart, Truck } from 'lucide-react';
-import { useState } from 'react';
+import { Heart, Share2, Shield, ShoppingCart, Truck } from "lucide-react";
+import { useState } from "react";
 
 interface ProductClientProps {
   product: Product;
@@ -65,13 +65,14 @@ export default function ProductClient({ product }: ProductClientProps) {
             <button
               key={index}
               onClick={() => setSelectedImage(index)}
-              className={`aspect-square bg-gradient-to-br from-amber-50 to-emerald-50 rounded-lg flex items-center justify-center border transition-colors cursor-pointer ${selectedImage === index
-                ? 'border-amber-400 ring-2 ring-amber-200'
-                : 'border-amber-100 hover:border-amber-300'
-                }`}
+              className={`aspect-square bg-gradient-to-br from-amber-50 to-emerald-50 rounded-lg flex items-center justify-center border transition-colors cursor-pointer ${
+                selectedImage === index
+                  ? "border-amber-400 ring-2 ring-amber-200"
+                  : "border-amber-100 hover:border-amber-300"
+              }`}
             >
               <span className="text-xl">
-                {index === 0 ? '🖼️' : index === 1 ? '📸' : '🌱'}
+                {index === 0 ? "🖼️" : index === 1 ? "📸" : "🌱"}
               </span>
             </button>
           ))}
@@ -115,11 +116,12 @@ export default function ProductClient({ product }: ProductClientProps) {
               <span className="text-2xl font-bold text-amber-700">
                 {product.price.toLocaleString()} FCFA
               </span>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <span className="ml-2 text-lg text-gray-400 line-through">
-                  {product.originalPrice.toLocaleString()} FCFA
-                </span>
-              )}
+              {product.originalPrice &&
+                product.originalPrice > product.price && (
+                  <span className="ml-2 text-lg text-gray-400 line-through">
+                    {product.originalPrice.toLocaleString()} FCFA
+                  </span>
+                )}
             </div>
 
             <div className="text-sm">
@@ -143,26 +145,30 @@ export default function ProductClient({ product }: ProductClientProps) {
           </div>
 
           {product.originalPrice && product.originalPrice > product.price && (
-            <div className="inline-block px-3 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold rounded-full mt-2">
-              Économisez {Math.round((1 - product.price / product.originalPrice) * 100)}%
+            <div className="inline-block px-3 py-1 bg-linear-to-r from-orange-500 to-amber-500 text-white text-sm font-bold rounded-full mt-2">
+              Économisez{" "}
+              {Math.round((1 - product.price / product.originalPrice) * 100)}%
             </div>
           )}
         </div>
 
         {/* Description */}
         <div>
-          <p className="text-gray-600 leading-relaxed">
-            {product.description}
-          </p>
+          <p className="text-gray-600 leading-relaxed">{product.description}</p>
         </div>
 
         {/* Caractéristiques */}
         {(product.ingredients || product.benefits || product.usage) && (
           <div className="rounded-lg p-4 border border-emerald-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Détails</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              Détails
+            </h3>
 
             {product.ingredients?.slice(0, 3).map((ingredient, index) => (
-              <div key={index} className="flex items-center text-gray-700 mb-2 last:mb-0">
+              <div
+                key={index}
+                className="flex items-center text-gray-700 mb-2 last:mb-0"
+              >
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mr-3"></span>
                 <span className="text-sm">{ingredient}</span>
               </div>
@@ -188,11 +194,11 @@ export default function ProductClient({ product }: ProductClientProps) {
         <div>
           <button
             onClick={handleAddToCart}
-            className="btn rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 text-white w-full py-3 text-base hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-sm hover:shadow"
+            className="btn rounded-lg bg-linear-to-r from-orange-500 to-amber-500 text-white w-full py-3 text-base hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-sm hover:shadow"
             disabled={product.stock === 0}
           >
             <ShoppingCart className="inline-block mr-2 w-5 h-5" />
-            {product.stock === 0 ? 'Rupture' : 'Ajouter au panier'}
+            {product.stock === 0 ? "Rupture" : "Ajouter au panier"}
           </button>
         </div>
 
@@ -217,7 +223,9 @@ export default function ProductClient({ product }: ProductClientProps) {
               {/* Ingrédients */}
               {product.ingredients && product.ingredients.length > 0 && (
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Ingrédients</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                    Ingrédients
+                  </h3>
                   <ul className="space-y-2 text-sm text-gray-700">
                     {product.ingredients.map((ingredient, index) => (
                       <li key={index}>• {ingredient}</li>
@@ -231,7 +239,9 @@ export default function ProductClient({ product }: ProductClientProps) {
                 <>
                   <div className="divider lg:divider-horizontal" />
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Bienfaits</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                      Bienfaits
+                    </h3>
                     <ul className="space-y-2 text-sm text-gray-700">
                       {product.benefits.map((benefit, index) => (
                         <li key={index}>• {benefit}</li>
@@ -246,7 +256,9 @@ export default function ProductClient({ product }: ProductClientProps) {
                 <>
                   <div className="divider lg:divider-horizontal" />
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-3">Mode d'utilisation</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                      Mode d'utilisation
+                    </h3>
                     <p className="text-sm text-gray-700 leading-relaxed">
                       {product.usage}
                     </p>

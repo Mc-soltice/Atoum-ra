@@ -13,7 +13,8 @@ interface Props {
 
 export default function PromoCard({ product, onCartClick }: Props) {
   const isAvailable = product.stock > 0;
-  const hasDiscount = product.originalPrice && product.originalPrice > product.price;
+  const hasDiscount =
+    product.originalPrice && product.originalPrice > product.price;
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
@@ -123,7 +124,13 @@ export default function PromoCard({ product, onCartClick }: Props) {
                     {product.originalPrice?.toLocaleString()} FCFA
                   </span>
                   <span className="text-xs font-semibold px-1.5 py-0.5 bg-red-100 text-red-600 rounded">
-                    -{((product.originalPrice! - product.price) / product.originalPrice! * 100).toFixed(0)}%
+                    -
+                    {(
+                      ((product.originalPrice! - product.price) /
+                        product.originalPrice!) *
+                      100
+                    ).toFixed(0)}
+                    %
                   </span>
                 </div>
                 {/* Prix promo */}
@@ -163,9 +170,10 @@ export default function PromoCard({ product, onCartClick }: Props) {
             hover:shadow-lg
             disabled:opacity-50
             disabled:cursor-not-allowed
-            ${isAvailable
-              ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 active:scale-[0.98]"
-              : "bg-gray-200 text-gray-600"
+            ${
+              isAvailable
+                ? "bg-linear-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600 active:scale-[0.98]"
+                : "bg-gray-200 text-gray-600"
             }
           `}
         >

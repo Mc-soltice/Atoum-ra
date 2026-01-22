@@ -1,6 +1,10 @@
 "use client";
 
-import { DeliveryOption, deliveryOptions, useCart } from "@/contexte/panier/CartContext";
+import {
+  DeliveryOption,
+  deliveryOptions,
+  useCart,
+} from "@/contexte/panier/CartContext";
 import { Check } from "lucide-react";
 
 /**
@@ -44,9 +48,10 @@ export default function DeliveryOptions() {
                 relative cursor-pointer
                 p-4 rounded-xl border-2
                 transition-all duration-300
-                ${isSelected
-                  ? "border-orange-500 bg-orange-50"
-                  : "border-gray-200 hover:border-gray-300 bg-white"
+                ${
+                  isSelected
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 hover:border-gray-300 bg-white"
                 }
                 hover:shadow-md
               `}
@@ -65,7 +70,7 @@ export default function DeliveryOptions() {
                   className="
                     absolute -top-2 -right-2
                     w-6 h-6
-                    bg-gradient-to-r from-orange-500 to-amber-500
+                    bg-linear-to-r from-orange-500 to-amber-500
                     text-white
                     rounded-full flex items-center justify-center
                     shadow-md

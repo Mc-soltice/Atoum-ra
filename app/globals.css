@@ -1,9 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
-
-
-      /* app/globals.css ou dans un module CSS */
+/* app/globals.css ou dans un module CSS */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -12,9 +10,10 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
- /* pour l'animation de la fleche voir tous */
- @keyframes bounce-right {
-  0%, 100% {
+/* pour l'animation de la fleche voir tous */
+@keyframes bounce-right {
+  0%,
+  100% {
     transform: translateX(0);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
@@ -40,12 +39,13 @@
 }
 
 @keyframes bounce-left {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
   50% {
-    transform: translateX(-6px);  /* Négatif pour aller vers la gauche */
+    transform: translateX(-6px); /* Négatif pour aller vers la gauche */
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
@@ -53,7 +53,6 @@
 .animate-bounce-left {
   animation: bounce-left 1s infinite;
 }
-
 
 /* pour le titre */
 
@@ -69,7 +68,6 @@
 .animate-shine {
   animation: shine 2s infinite;
 }
-
 
 /* app/globals.css ou un fichier CSS séparé */
 @keyframes slideInRight {
@@ -144,7 +142,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -153,7 +152,8 @@
 }
 
 @keyframes bounceRight {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0);
   }
   50% {
@@ -162,7 +162,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -209,3 +210,5 @@
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+/* partie admin */

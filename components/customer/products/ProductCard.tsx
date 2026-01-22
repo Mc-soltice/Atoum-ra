@@ -27,9 +27,10 @@ export default function ProductCard({ product, onCartClick }: Props) {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-lg bg-white shadow-sm border border-gray-100
-                   transition-shadow duration-300 hover:shadow-md flex flex-col p-3">
-
+    <div
+      className="group relative overflow-hidden rounded-lg bg-white shadow-sm border border-gray-100
+                   transition-shadow duration-300 hover:shadow-md flex flex-col p-3"
+    >
       {/* Image */}
       <Link
         href={`/produits/${product.id}`}
@@ -45,8 +46,10 @@ export default function ProductCard({ product, onCartClick }: Props) {
 
         {/* Badge disponibilité */}
         {isAvailable && (
-          <span className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold 
-                         text-white bg-emerald-500">
+          <span
+            className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-semibold 
+                         text-white bg-emerald-500"
+          >
             Disponible
           </span>
         )}
@@ -73,9 +76,10 @@ export default function ProductCard({ product, onCartClick }: Props) {
             className={`
               w-full px-3 py-1.5 rounded-md text-xs font-medium
               transition-colors flex items-center justify-center gap-1
-              ${isAvailable
-                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ${
+                isAvailable
+                  ? "bg-linear-to-r from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }
             `}
           >

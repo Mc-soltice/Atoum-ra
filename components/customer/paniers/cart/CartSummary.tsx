@@ -135,9 +135,10 @@ export default function CartSummary({
                 w-full py-3 px-4 rounded-xl  
                 transition-all duration-300
                 flex items-center justify-center gap-2
-                ${items.length === 0
-                  ? "text-gray-700 font-semibold border-2 border-orange cursor-not-allowed"
-                  : "text-white font-semibold bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg"
+                ${
+                  items.length === 0
+                    ? "text-gray-700 font-semibold border-2 border-orange cursor-not-allowed"
+                    : "text-white font-semibold bg-linear-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 shadow-md hover:shadow-lg"
                 }
                   
               `}
@@ -151,7 +152,7 @@ export default function CartSummary({
               href="/produits"
               className={`
                 block w-full py-2.5 px-4 text-center rounded-xl
-                bg-gradient-to-r from-[#BBCB64] to-[#A4BB64] hover:from-[#A0B84F] hover:to-[#8FAE3F]
+                bg-linear-to-r from-[#BBCB64] to-[#A4BB64] hover:from-[#A0B84F] hover:to-[#8FAE3F]
                 text-white font-medium
                 hover:border-gray-400 hover:bg-gray-50
                 transition-colors duration-200

@@ -2,8 +2,8 @@
 "use client";
 
 import { ProductPromo } from "@/types/product";
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { TouchEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { TouchEvent, useCallback, useEffect, useRef, useState } from "react";
 import Carousel3DSkeleton from "./products/promotions/Carousel3DSkeleton";
 import PromoCard from "./products/promotions/PromoCard";
 
@@ -14,10 +14,14 @@ interface CarouselProps {
 }
 
 function cn(...classes: (string | boolean | undefined | null)[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
-export default function CarouselSurMesure({ products, autoPlay = false, interval = 5000 }: CarouselProps) {
+export default function CarouselSurMesure({
+  products,
+  autoPlay = false,
+  interval = 5000,
+}: CarouselProps) {
   const [active, setActive] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -37,16 +41,16 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const handlePrevious = useCallback(() => {
-    setActive(prev => (prev === 0 ? products.length - 1 : prev - 1));
+    setActive((prev) => (prev === 0 ? products.length - 1 : prev - 1));
   }, [products.length]);
 
   const handleNext = useCallback(() => {
-    setActive(prev => (prev === products.length - 1 ? 0 : prev + 1));
+    setActive((prev) => (prev === products.length - 1 ? 0 : prev + 1));
   }, [products.length]);
 
   // Touch handlers
@@ -86,23 +90,26 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
   };
 
   // Mouse wheel pour desktop
-  const handleWheel = useCallback((e: WheelEvent) => {
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      e.preventDefault();
-      if (e.deltaX > 0) {
-        handleNext();
-      } else {
-        handlePrevious();
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        e.preventDefault();
+        if (e.deltaX > 0) {
+          handleNext();
+        } else {
+          handlePrevious();
+        }
       }
-    }
-  }, [handleNext, handlePrevious]);
+    },
+    [handleNext, handlePrevious],
+  );
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => container.removeEventListener("wheel", handleWheel);
   }, [handleWheel]);
 
   // Auto-play
@@ -115,11 +122,11 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') handlePrevious();
-      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === "ArrowLeft") handlePrevious();
+      if (e.key === "ArrowRight") handleNext();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handlePrevious, handleNext]);
 
   // Calcul du décalage pour le drag
@@ -154,7 +161,8 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
           {/* Compteur */}
           <div className="px-4 py-2 bg-gray-100 rounded-full">
             <span className="text-gray-800 font-bold">
-              <span className="text-red-600">{active + 1}</span> / {products.length}
+              <span className="text-red-600">{active + 1}</span> /{" "}
+              {products.length}
             </span>
           </div>
 
@@ -167,7 +175,7 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
                 "p-3 rounded-full border transition-all duration-300",
                 active === 0
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95",
               )}
               aria-label="Produit précédent"
             >
@@ -180,7 +188,7 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
                 "p-3 rounded-full border transition-all duration-300",
                 active === products.length - 1
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:scale-105 active:scale-95",
               )}
               aria-label="Produit suivant"
             >
@@ -212,7 +220,7 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
         )}
 
         {/* Container des cartes */}
-        <div className="relative h-[420px] overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white p-4 shadow-lg border border-gray-100">
+        <div className="relative h-105 overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-white p-4 shadow-lg border border-gray-100">
           {/* Cartes */}
           <div className="absolute inset-0 flex items-center justify-center">
             {products.map((product, index) => {
@@ -239,8 +247,10 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
                     opacity,
                     filter: `blur(${blur}px)`,
                     zIndex,
-                    pointerEvents: isActive ? 'auto' : 'none',
-                    transition: isDragging ? 'none' : 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    pointerEvents: isActive ? "auto" : "none",
+                    transition: isDragging
+                      ? "none"
+                      : "all 500ms cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 >
                   <div className="px-4">
@@ -254,10 +264,12 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
           {/* Overlay de glissement */}
           {isDragging && dragOffset !== 0 && (
             <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-              <div className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500/90 to-orange-500/90 text-white font-medium transform transition-transform duration-200",
-                dragOffset > 0 ? "-translate-x-12" : "translate-x-12"
-              )}>
+              <div
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-full bg-linear-to-r from-red-500/90 to-orange-500/90 text-white font-medium transform transition-transform duration-200",
+                  dragOffset > 0 ? "-translate-x-12" : "translate-x-12",
+                )}
+              >
                 {dragOffset > 0 ? (
                   <>
                     <ChevronRight className="w-5 h-5" />
@@ -283,8 +295,8 @@ export default function CarouselSurMesure({ products, autoPlay = false, interval
               className={cn(
                 "rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2",
                 index === active
-                  ? "w-8 h-2 bg-gradient-to-r from-red-500 to-orange-500"
-                  : "w-2 h-2 bg-gray-300 hover:bg-gray-400"
+                  ? "w-8 h-2 bg-linear-to-r from-red-500 to-orange-500"
+                  : "w-2 h-2 bg-gray-300 hover:bg-gray-400",
               )}
               aria-label={`Aller au produit ${index + 1}`}
             />

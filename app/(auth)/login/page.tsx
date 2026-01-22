@@ -1,37 +1,34 @@
 // app/(auth)/login/page.tsx
-// Page de connexion/inscription avec design moderne, animations et fond
-
-"use client"; // Nécessaire pour les composants interactifs et animations
+"use client";
 
 import { ArrowRight, Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-hot-toast";
 
 export default function AuthPage() {
-  const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true); // État pour basculer entre login/register
-  const [showPassword, setShowPassword] = useState(false); // État pour afficher/cacher le mot de passe
-  const [isLoading, setIsLoading] = useState(false); // État pour gérer le chargement
-  const [mounted, setMounted] = useState(false); // État pour éviter les problèmes d'hydratation
+  const { login, register } = useAuth();
 
-  // Données du formulaire
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    name: "", // Seulement pour l'inscription
+    first_name: "",
+    last_name: "",
+    phone: "",
+    password_confirmation: "",
   });
 
-  // Effet pour gérer le montage du composant (évite les conflits SSR)
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  /**
-   * Gestionnaire de changement des champs du formulaire
-   * Met à jour l'état formData en fonction du champ modifié
-   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -40,40 +37,55 @@ export default function AuthPage() {
     }));
   };
 
-  /**
-   * Soumission du formulaire de connexion/inscription
-   * Simule l'authentification avec une API
-   * Redirige vers la page d'accueil après succès
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulation d'un appel API avec délai
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      if (isLogin) {
+        await login(formData.email, formData.password);
+      } else {
+        // Validation des mots de passe
+        if (formData.password !== formData.password_confirmation) {
+          toast.error("Les mots de passe ne correspondent pas");
+          setIsLoading(false);
+          return;
+        }
 
-    console.log("Données soumises:", formData);
+        const payload = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          password_confirmation: formData.password_confirmation,
+        };
 
-    // Ici, vous intégreriez votre logique d'authentification réelle
-    // Exemple: await authAPI.login(formData.email, formData.password);
-
-    setIsLoading(false);
-    router.push("/"); // Redirection vers la page d'accueil après connexion
+        await register(payload);
+      }
+    } catch (error) {
+      // Les erreurs sont déjà gérées dans le hook et le service
+      console.error("Erreur lors de l'authentification:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  /**
-   * Fonction pour basculer entre les modes login et register
-   * Réinitialise les champs du formulaire lors du changement
-   */
   const toggleAuthMode = () => {
     setIsLogin(!isLogin);
-    setFormData({ email: "", password: "", name: "" });
+    setFormData({
+      email: "",
+      password: "",
+      first_name: "",
+      last_name: "",
+      phone: "",
+      password_confirmation: "",
+    });
   };
 
-  // Si le composant n'est pas encore monté, retourner un squelette minimal
   if (!mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-emerald-50 to-teal-100">
         <div className="animate-pulse bg-white/80 backdrop-blur-sm rounded-2xl p-8 w-full max-w-md">
           <div className="h-8 bg-gray-300 rounded w-3/4 mb-6"></div>
           <div className="space-y-4">
@@ -88,12 +100,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      {/* 
-        Section de fond avec image et overlay
-        Utilise une image de produits naturels pour rester dans le thème
-      */}
       <div className="absolute inset-0 z-0">
-        {/* Image de fond thématique - produits naturels */}
         <Image
           src="/images/login.png"
           alt="Produits naturels"
@@ -101,25 +108,11 @@ export default function AuthPage() {
           priority
           className="object-cover object-center"
         />
-
-        {/* Overlay pour améliorer la lisibilité du formulaire */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 via-teal-800/60 to-green-900/70"></div>
-
+        <div className="absolute inset-0 bg-linear-to-br from-emerald-900/70 via-teal-800/60 to-green-900/70"></div>
       </div>
 
-      {/* 
-        Conteneur principal du formulaire
-        Utilise backdrop-blur pour un effet de verre (glassmorphism)
-      */}
       <div className="relative z-10 w-full max-w-md">
-        {/* 
-          Carte du formulaire avec animation d'entrée
-          Les classes bg-white/20 et backdrop-blur-lg créent l'effet transparent
-        */}
-        <div
-          className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 overflow-hidden animate-fade-in-up"
-        >
-          {/* En-tête avec logo et titre */}
+        <div className="bg-white/20 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 overflow-hidden animate-fade-in-up">
           <div className="p-8">
             <div className="text-center mb-8">
               <Link href="/" className="inline-block">
@@ -134,29 +127,61 @@ export default function AuthPage() {
               </p>
             </div>
 
-            {/* Formulaire d'authentification */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Champ nom (uniquement pour l'inscription) avec animation */}
+              {/* Champs pour l'inscription */}
               {!isLogin && (
-                <div className="animate-slide-down">
-                  <label className="label">
-                    <span className="label-text text-white">Nom complet</span>
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-emerald-300" />
+                <>
+                  <div className="grid grid-cols-2 gap-4 animate-slide-down">
+                    <div>
+                      <label className="label">
+                        <span className="label-text text-white">Prénom</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <User className="h-5 w-5 text-emerald-300" />
+                        </div>
+                        <input
+                          type="text"
+                          name="first_name"
+                          value={formData.first_name}
+                          onChange={handleInputChange}
+                          placeholder="Prénom"
+                          className=" outline-none input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60"
+                          required={!isLogin}
+                        />
+                      </div>
                     </div>
+                    <div>
+                      <label className="label">
+                        <span className="label-text text-white">Nom</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="last_name"
+                        value={formData.last_name}
+                        onChange={handleInputChange}
+                        placeholder="Nom"
+                        className="outline-none input input-bordered w-full bg-white/10 border-white/30 text-white placeholder:text-white/60"
+                        required={!isLogin}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="animate-slide-down">
+                    <label className="label">
+                      <span className="label-text text-white">Téléphone</span>
+                    </label>
                     <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="Votre nom"
-                      className="input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300"
+                      placeholder="+33 1 23 45 67 89"
+                      className="outline-none input input-bordered w-full bg-white/10 border-white/30 text-white placeholder:text-white/60"
                       required={!isLogin}
                     />
                   </div>
-                </div>
+                </>
               )}
 
               {/* Champ email */}
@@ -164,7 +189,7 @@ export default function AuthPage() {
                 <label className="label">
                   <span className="label-text text-white">Email</span>
                 </label>
-                <div className="relative group">
+                <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-emerald-300" />
                   </div>
@@ -174,20 +199,20 @@ export default function AuthPage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="email@exemple.com"
-                    className="input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300"
+                    className="outline-none input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60"
                     required
                   />
                 </div>
               </div>
 
-              {/* Champ mot de passe avec toggle de visibilité */}
+              {/* Champ mot de passe */}
               <div>
                 <label className="label">
                   <span className="label-text text-white">Mot de passe</span>
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="label-text-alt text-emerald-300 hover:text-emerald-200 transition-colors"
+                    className="label-text-alt text-emerald-300 hover:text-emerald-200"
                   >
                     {showPassword ? (
                       <span className="flex items-center gap-1">
@@ -200,7 +225,7 @@ export default function AuthPage() {
                     )}
                   </button>
                 </label>
-                <div className="relative group">
+                <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Lock className="h-5 w-5 text-emerald-300" />
                   </div>
@@ -210,29 +235,36 @@ export default function AuthPage() {
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="••••••••"
-                    className="input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 transition-all duration-300"
+                    className="outline-none input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60"
                     required
                     minLength={6}
                   />
                 </div>
               </div>
 
-              {/* Options supplémentaires pour le login */}
-              {isLogin && (
-                <div className="flex items-center justify-between">
-                  <label className="cursor-pointer flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-sm border-white/30 bg-white/10 checked:bg-emerald-500"
-                    />
-                    <span className="text-white/80 text-sm">Se souvenir de moi</span>
+              {/* Confirmation mot de passe pour inscription */}
+              {!isLogin && (
+                <div className="animate-slide-down">
+                  <label className="label">
+                    <span className="label-text text-white">
+                      Confirmer le mot de passe
+                    </span>
                   </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-emerald-300 hover:text-emerald-200 transition-colors"
-                  >
-                    Mot de passe oublié?
-                  </Link>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-emerald-300" />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password_confirmation"
+                      value={formData.password_confirmation}
+                      onChange={handleInputChange}
+                      placeholder="••••••••"
+                      className="outline-none input input-bordered w-full pl-10 bg-white/10 border-white/30 text-white placeholder:text-white/60"
+                      required={!isLogin}
+                      minLength={6}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -240,7 +272,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn w-full bg-gradient-to-r from-emerald-500 to-teal-600 border-none text-white hover:from-emerald-600 hover:to-teal-700 transform hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-emerald-500/30"
+                className="btn w-full bg-linear-to-r from-emerald-500 to-teal-600 border-none text-white hover:from-emerald-600 hover:to-teal-700"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
@@ -258,111 +290,21 @@ export default function AuthPage() {
               </button>
             </form>
 
-            {/* Séparateur */}
-            <div className="divider divider-neutral my-8">ou</div>
-
-            {/* Boutons de connexion sociale */}
-            <div className="grid grid-cols-2 gap-4">
-              <button className="btn btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-colors">
-                <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 2.04c-5.5 0-10 4.49-10 10.02c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89c1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02z" />
-                </svg>
-                Facebook
-              </button>
-              <button className="btn btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50 transition-colors">
-                <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 2a10 10 0 0 1 10 10a10 10 0 0 1-10 10A10 10 0 0 1 2 12A10 10 0 0 1 12 2m0 2a8 8 0 0 0-8 8a8 8 0 0 0 8 8a8 8 0 0 0 8-8a8 8 0 0 0-8-8m-1 5h2v6h-2v-6m0 8h2v2h-2v-2z" />
-                </svg>
-                Google
-              </button>
-            </div>
-
             {/* Lien pour basculer entre login/register */}
             <div className="text-center mt-8">
               <p className="text-white/80">
                 {isLogin ? "Pas encore de compte?" : "Déjà un compte?"}
                 <button
                   onClick={toggleAuthMode}
-                  className="ml-2 text-emerald-300 font-semibold hover:text-emerald-200 transition-colors"
+                  className="ml-2 text-emerald-300 font-semibold hover:text-emerald-200"
                 >
                   {isLogin ? "S'inscrire" : "Se connecter"}
                 </button>
               </p>
             </div>
           </div>
-
-          {/* Footer avec lien vers la page d'accueil */}
-          <div className="px-8 py-6 bg-black/20 border-t border-white/10">
-            <p className="text-center text-white/60 text-sm">
-              En continuant, vous acceptez nos{" "}
-              <Link href="/terms" className="text-emerald-300 hover:text-emerald-200">
-                Conditions d&apos;utilisation
-              </Link>{" "}
-              et notre{" "}
-              <Link href="/privacy" className="text-emerald-300 hover:text-emerald-200">
-                Politique de confidentialité
-              </Link>
-            </p>
-            <div className="text-center mt-4">
-              <Link
-                href="/"
-                className="inline-flex items-center text-white/70 hover:text-white transition-colors text-sm"
-              >
-                ← Retour à l&apos;accueil
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
-
-      {/* 
-        Styles CSS personnalisés pour les animations
-        Ajoutés dans le composant pour éviter les dépendances externes
-      */}
-      <style jsx global>{`
-        @keyframes fade-in-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) rotate(10deg);
-          }
-        }
-        
-        @keyframes slide-down {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-fade-in-up {
-          animation: fade-in-up 0.6s ease-out;
-        }
-        
-        .animate-float {
-          animation: float linear infinite;
-        }
-        
-        .animate-slide-down {
-          animation: slide-down 0.4s ease-out;
-        }
-      `}</style>
     </div>
   );
 }

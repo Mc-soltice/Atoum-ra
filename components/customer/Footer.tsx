@@ -1,18 +1,26 @@
 "use client";
 
-import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, X } from 'lucide-react';
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Mail,
+  MapPin,
+  Phone,
+  X,
+} from "lucide-react";
 import Image from "next/image";
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 // Palette de couleurs ambrées douces
 const amberGradients = [
-  'from-amber-600/90 to-amber-800/90',
-  'from-amber-700/90 to-amber-900/90',
-  'from-orange-600/90 to-amber-800/90',
-  'from-amber-600/90 to-orange-700/90',
-  'from-yellow-700/90 to-amber-800/90',
-  'from-[#6ABF05] to-[#FF7F00]'
+  "from-amber-600/90 to-amber-800/90",
+  "from-amber-700/90 to-amber-900/90",
+  "from-orange-600/90 to-amber-800/90",
+  "from-amber-600/90 to-orange-700/90",
+  "from-yellow-700/90 to-amber-800/90",
+  "from-[#6ABF05] to-[#FF7F00]",
 ];
 
 const Footer = () => {
@@ -20,9 +28,9 @@ const Footer = () => {
 
   // Animation de gradient en rotation (optionnel)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const interval = setInterval(() => {
-        setCurrentGradient(prev => {
+        setCurrentGradient((prev) => {
           const currentIndex = amberGradients.indexOf(prev);
           const nextIndex = (currentIndex + 1) % amberGradients.length;
           return amberGradients[nextIndex];
@@ -41,8 +49,9 @@ const Footer = () => {
       facebook: "https://www.facebook.com/profile.php?id=61576672472086",
       twitter: "https://x.com/UmbrellaINDUS_S",
       instagram: "https://instagram.com",
-      linkedin: "https://www.linkedin.com/in/umbrella-industrial-services-979046366",
-    }
+      linkedin:
+        "https://www.linkedin.com/in/umbrella-industrial-services-979046366",
+    },
   };
 
   const quickLinks = [
@@ -73,7 +82,7 @@ const Footer = () => {
 
   return (
     <footer
-      className={`bg-gradient-to-r ${currentGradient} text-amber-50 transition-all duration-1000`}
+      className={`bg-linear-to-r ${currentGradient} text-amber-50 transition-all duration-1000`}
       role="contentinfo"
       aria-label="Pied de page"
     >
@@ -81,7 +90,6 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto">
           {/* Grille principale */}
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
-
             {/* Informations de l'entreprise - Pleine largeur sur mobile */}
             <div className="space-y-6 lg:col-span-1">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -107,8 +115,8 @@ const Footer = () => {
               </div>
 
               <p className="text-amber-100/80 leading-relaxed text-sm sm:text-base">
-                Solutions professionnelles de transformation et construction en bois
-                pour des espaces impeccables et performants.
+                Solutions professionnelles de transformation et construction en
+                bois pour des espaces impeccables et performants.
               </p>
 
               <div className="flex space-x-3 pt-2">
@@ -145,15 +153,11 @@ const Footer = () => {
 
             {/* Liens rapides - Colonne 2 sur desktop */}
             <div className="lg:col-span-1">
-              <FooterSectionTitle>
-                Navigation
-              </FooterSectionTitle>
+              <FooterSectionTitle>Navigation</FooterSectionTitle>
               <ul className="space-y-3 sm:space-y-4" role="list">
                 {quickLinks.map((link) => (
                   <li key={link.href}>
-                    <QuickLink href={link.href}>
-                      {link.label}
-                    </QuickLink>
+                    <QuickLink href={link.href}>{link.label}</QuickLink>
                   </li>
                 ))}
               </ul>
@@ -161,9 +165,7 @@ const Footer = () => {
 
             {/* Engagements - Colonne 3 sur desktop */}
             <div className="lg:col-span-1">
-              <FooterSectionTitle>
-                Nos Engagements
-              </FooterSectionTitle>
+              <FooterSectionTitle>Nos Engagements</FooterSectionTitle>
               <ul className="space-y-4 sm:space-y-5" role="list">
                 {engagements.map((engagement, index) => (
                   <li key={index}>
@@ -178,9 +180,7 @@ const Footer = () => {
 
             {/* Informations de contact - Colonne 4 sur desktop */}
             <div className="lg:col-span-1">
-              <FooterSectionTitle>
-                Contactez-nous
-              </FooterSectionTitle>
+              <FooterSectionTitle>Contactez-nous</FooterSectionTitle>
               <ul className="space-y-5 sm:space-y-6" role="list">
                 <ContactItem
                   icon={<MapPin size={18} className="sm:w-5 sm:h-5" />}
@@ -198,7 +198,7 @@ const Footer = () => {
                   aria-label="Téléphone"
                 >
                   <a
-                    href={`tel:${contactInfo.phone.replace(/\s/g, '')}`}
+                    href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}
                     className="text-amber-100/80 hover:text-amber-50 transition-colors text-sm sm:text-base"
                   >
                     {contactInfo.phone}
@@ -224,27 +224,23 @@ const Footer = () => {
           <div className="border-t border-amber-400/20 mt-10 pt-8 md:mt-16 md:pt-10">
             {/* Copyright */}
             <p className="text-amber-100/70 text-sm text-center mb-6 md:mb-8">
-              © {new Date().getFullYear()}{' '}
-              <span className="font-semibold text-amber-50">Atoum-ra</span>
-              . Tous droits réservés.
+              © {new Date().getFullYear()}{" "}
+              <span className="font-semibold text-amber-50">Atoum-ra</span>.
+              Tous droits réservés.
             </p>
 
             {/* Liens légaux - Empilés sur mobile, en ligne sur desktop */}
             <div className="flex flex-col items-center space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-8 text-xs text-amber-100/60">
-              <LegalLink href="/mentions-legales">
-                Mentions légales
-              </LegalLink>
+              <LegalLink href="/mentions-legales">Mentions légales</LegalLink>
               <LegalLink href="/politique-confidentialite">
                 Politique de confidentialité
               </LegalLink>
-              <LegalLink href="/cgu">
-                Conditions générales
-              </LegalLink>
+              <LegalLink href="/cgu">Conditions générales</LegalLink>
             </div>
 
             {/* Retour en haut (mobile seulement) */}
             <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               className="md:hidden mt-8 mx-auto flex items-center justify-center w-10 h-10 rounded-full bg-amber-600/30 hover:bg-amber-600/50 transition-colors"
               aria-label="Retour en haut de la page"
             >
@@ -270,7 +266,7 @@ function SocialLink({
   href,
   label,
   ariaLabel,
-  children
+  children,
 }: {
   href: string;
   label: string;
@@ -291,7 +287,13 @@ function SocialLink({
   );
 }
 
-function QuickLink({ href, children }: { href: string; children: React.ReactNode }) {
+function QuickLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={href}
@@ -304,7 +306,13 @@ function QuickLink({ href, children }: { href: string; children: React.ReactNode
   );
 }
 
-function EngagementItem({ title, description }: { title: string; description: string }) {
+function EngagementItem({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   return (
     <div className="group flex items-start text-amber-100/80 hover:text-amber-50 transition-colors duration-300">
       <span className="mr-3 text-emerald-500 text-xl flex-shrink-0 mt-0.5">
@@ -322,24 +330,30 @@ function EngagementItem({ title, description }: { title: string; description: st
   );
 }
 
-function ContactItem({ icon, children, ariaLabel }: {
+function ContactItem({
+  icon,
+  children,
+  ariaLabel,
+}: {
   icon: React.ReactNode;
   children: React.ReactNode;
   ariaLabel: string;
 }) {
   return (
     <li className="flex items-start" aria-label={ariaLabel}>
-      <span className="text-amber-300 mr-3 mt-0.5 flex-shrink-0">
-        {icon}
-      </span>
-      <div className="flex-1">
-        {children}
-      </div>
+      <span className="text-amber-300 mr-3 mt-0.5 flex-shrink-0">{icon}</span>
+      <div className="flex-1">{children}</div>
     </li>
   );
 }
 
-function LegalLink({ href, children }: { href: string; children: React.ReactNode }) {
+function LegalLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
   return (
     <Link
       href={href}

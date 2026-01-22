@@ -1,10 +1,12 @@
 "use client";
 
 import { useCart } from "@/contexte/panier/CartContext"; // Importez le contexte
-import { Logs, Search, ShoppingCart, UserRoundPlus } from "lucide-react";
+import { Logs, Search, ShoppingCart, User, UserRoundPlus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuthContext } from "@/contexte/AuthContext";
+import UserAuthActions from "../customer/users/UserAuthActions";
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +28,7 @@ export default function Header() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
+  const { user, loading } = useAuthContext();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -40,7 +42,7 @@ export default function Header() {
     { href: "/", label: "Accueil" },
     { href: "/produits", label: "Produits" },
     { href: "/promotions", label: "Promotions", highlight: true },
-    { href: "/about", label: "A Propos" }
+    { href: "/about", label: "A Propos" },
   ];
 
   return (
@@ -48,20 +50,14 @@ export default function Header() {
       className={`
         sticky top-0 z-50 w-full
         transition-all duration-300 ease-in-out
-        ${scrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm"
-          : "bg-white"
-        }
+        ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm" : "bg-white"}
       `}
     >
       {/* Top Bar */}
       <div className="container mx-auto px-50">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex-shrink-0"
-          >
+          <Link href="/" className="shrink-0">
             <div className="relative h-7 w-24 sm:h-8 sm:w-28 md:h-10 md:w-32">
               <Image
                 src="/images/Logo.png"
@@ -125,7 +121,7 @@ export default function Header() {
               href="/panier"
               badgeCount={cartItemCount}
               className="hidden xs:flex"
-              aria-label={`Panier (${cartItemCount} article${cartItemCount !== 1 ? 's' : ''})`}
+              aria-label={`Panier (${cartItemCount} article${cartItemCount !== 1 ? "s" : ""})`}
             >
               <ShoppingCart size={20} className="sm:w-5 sm:h-5" />
             </IconLink>
@@ -134,16 +130,51 @@ export default function Header() {
               <Logs size={20} className="sm:w-5 sm:h-5" />
             </IconLink>
 
-            <IconLink href="/login" className="hidden md:flex">
-              <UserRoundPlus size={20} className="sm:w-5 sm:h-5" />
-            </IconLink>
+            {/* Auth actions */}
+            {!loading && (
+              <>
+                {!user ? (
+                  /* ===== UTILISATEUR NON CONNECTÉ ===== */
+                  <Link
+                    href="/login"
+                    className="
+          hidden md:flex 
+          items-center gap-2 p-2 rounded-md
+          text-gray-700 hover:text-black 
+          hover:bg-gray-100 active:bg-gray-200 
+          transition-colors
+        "
+                    aria-label="Se connecter"
+                  >
+                    <UserRoundPlus size={20} className="sm:w-5 sm:h-5" />
+                  </Link>
+                ) : (
+                  /* ===== UTILISATEUR CONNECTÉ ===== */
+                  <>
+                    {/* Version avec dropdown - Desktop */}
+                    <div className="hidden md:block">
+                      <UserAuthActions
+                        className="p-2"
+                        iconSize={20}
+                        showText={false} // Changez à true si vous voulez voir le texte
+                      />
+                    </div>
+
+                    {/* Version mobile - Icone seule */}
+                    <div className="md:hidden">
+                      <User className="p-2" />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
 
             {/* Panier Mobile (toujours visible) */}
             <IconLink
               href="/panier"
               badgeCount={cartItemCount}
               className="xs:hidden"
-              aria-label={`Panier (${cartItemCount} article${cartItemCount !== 1 ? 's' : ''})`}
+              aria-label={`Panier (${cartItemCount} article${cartItemCount !== 1 ? "s" : ""})`}
             >
               <ShoppingCart size={20} />
             </IconLink>
@@ -203,10 +234,9 @@ export default function Header() {
 
       {/* Navigation Mobile - Badges Horizontaux Scrollables */}
       <div className="lg:hidden border-t border-gray-100 relative">
-
         {/* Container des badges scrollable */}
         <div className="flex items-center gap-2 px-2 py-3 overflow-x-auto scrollbar-hide">
-          <div className="min-w-[8px]" />
+          <div className="min-w-2" />
           {navItems.map((item) => (
             <MobileBadgeLink
               key={item.href}
@@ -217,7 +247,7 @@ export default function Header() {
             </MobileBadgeLink>
           ))}
 
-          <div className="min-w-[8px]" />
+          <div className="min-w-2" />
         </div>
       </div>
     </header>
@@ -231,7 +261,7 @@ interface IconLinkProps {
   children: React.ReactNode;
   badgeCount?: number;
   className?: string;
-  'aria-label'?: string;
+  "aria-label"?: string;
 }
 
 function IconLink({
@@ -239,7 +269,7 @@ function IconLink({
   children,
   badgeCount,
   className = "",
-  "aria-label": ariaLabel
+  "aria-label": ariaLabel,
 }: IconLinkProps) {
   return (
     <Link
@@ -266,41 +296,17 @@ function Badge({ count }: { count: number }) {
     <span
       className="
         absolute -top-1 -right-1 
-        bg-gradient-to-r from-orange-500 to-amber-500 text-white 
+        bg-linear-to-r from-orange-500 to-amber-500 text-white 
         text-xs font-bold 
         rounded-full h-5 w-5 
         flex items-center justify-center
         shadow-sm
         border border-white
       "
-      aria-label={`${count} article${count !== 1 ? 's' : ''} dans le panier`}
+      aria-label={`${count} article${count !== 1 ? "s" : ""} dans le panier`}
     >
       {count > 9 ? "9+" : count}
     </span>
-  );
-}
-
-interface NavLinkProps {
-  href: string;
-  children: React.ReactNode;
-  highlight?: boolean;
-}
-
-function NavLink({ href, children, highlight = false }: NavLinkProps) {
-  return (
-    <Link
-      href={href}
-      className={`
-        text-sm font-medium px-2 py-1 rounded
-        transition-colors
-        ${highlight
-          ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
-          : 'text-gray-700 hover:text-black hover:bg-gray-100'
-        }
-      `}
-    >
-      {children}
-    </Link>
   );
 }
 
@@ -311,20 +317,26 @@ interface MobileBadgeLinkProps {
   highlight?: boolean;
 }
 
-function MobileBadgeLink({ href, children, icon, highlight = false }: MobileBadgeLinkProps) {
+function MobileBadgeLink({
+  href,
+  children,
+  icon,
+  highlight = false,
+}: MobileBadgeLinkProps) {
   return (
     <Link
       href={href}
       className={`
-        flex-shrink-0
+        shrink-0
         inline-flex items-center gap-1.5
         px-3 py-1.5 rounded-full
         text-xs font-medium
         transition-all duration-200
         whitespace-nowrap
-        ${highlight
-          ? 'bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-700 hover:bg-red-100 hover:shadow-sm'
-          : 'bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+        ${
+          highlight
+            ? "bg-linear-to-r from-red-50 to-red-100 border border-red-200 text-red-700 hover:bg-red-100 hover:shadow-sm"
+            : "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200 hover:shadow-sm"
         }
         active:scale-95
       `}
@@ -363,7 +375,7 @@ const styles = `
 `;
 
 // Ajout des styles au document
-if (typeof document !== 'undefined') {
+if (typeof document !== "undefined") {
   const styleSheet = document.createElement("style");
   styleSheet.textContent = styles;
   document.head.appendChild(styleSheet);

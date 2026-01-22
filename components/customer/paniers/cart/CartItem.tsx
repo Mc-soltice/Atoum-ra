@@ -83,13 +83,13 @@ export default function CartItem({ product, quantity }: Props) {
               onClick={handleDecrease}
               className="h-8 w-8 rounded-full border flex items-center justify-center 
                          hover:bg-gray-100 active:bg-gray-200 transition-colors
-                         focus:outline-none focus:ring-2 focus:ring-gray-300"
+                         focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-400"
               aria-label={`Diminuer la quantité de ${product.name}`}
             >
               <Minus size={14} />
             </button>
 
-            <span className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-50 min-w-[2.5rem] text-center">
+            <span className="px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 min-w-10 text-center text-gray-500">
               {quantity}
             </span>
 
@@ -97,7 +97,7 @@ export default function CartItem({ product, quantity }: Props) {
               onClick={handleIncrease}
               className="h-8 w-8 rounded-full border flex items-center justify-center 
                          hover:bg-gray-100 active:bg-gray-200 transition-colors
-                         focus:outline-none focus:ring-2 focus:ring-gray-300"
+                         focus:outline-none focus:ring-2 focus:ring-gray-300 text-gray-400"
               aria-label={`Augmenter la quantité de ${product.name}`}
             >
               <Plus size={14} />

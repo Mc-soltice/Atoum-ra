@@ -50,10 +50,7 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
       <div
         className={`
           fixed inset-0 z-50 lg:z-40 transition-all duration-300 ease-in-out
-          ${isOpen
-            ? "opacity-100 visible bg-black/50"
-            : "opacity-0 invisible"
-          }
+          ${isOpen ? "opacity-100 visible bg-black/50" : "opacity-0 invisible"}
         `}
         onClick={onClose}
       />
@@ -69,20 +66,23 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
         {/* En-tête avec animation */}
         <div
           className="flex items-center justify-between p-4 border-b border-gray-200 
-                   bg-gradient-to-r from-amber-500 to-amber-600 text-white
+                   bg-linear-to-r from-amber-500 to-amber-600 text-white
                    transition-all duration-300"
           style={{
             opacity: isOpen ? 1 : 0,
             transform: isOpen ? "translateY(0)" : "translateY(-10px)",
-            transition: "opacity 0.3s ease-out, transform 0.3s ease-out"
+            transition: "opacity 0.3s ease-out, transform 0.3s ease-out",
           }}
         >
           <div className="flex items-center gap-3">
-            <ShoppingBag className="h-6 w-6" style={{ animation: "bounce 1s infinite" }} />
+            <ShoppingBag
+              className="h-6 w-6"
+              style={{ animation: "bounce 1s infinite" }}
+            />
             <div>
               <h2 className="text-lg font-bold">Votre Panier</h2>
               <p className="text-sm text-amber-100">
-                {totalItems} article{totalItems !== 1 ? 's' : ''}
+                {totalItems} article{totalItems !== 1 ? "s" : ""}
               </p>
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
               style={{
                 opacity: isOpen ? 1 : 0,
                 transform: isOpen ? "scale(1)" : "scale(0.9)",
-                transition: "opacity 0.5s ease-out, transform 0.5s ease-out"
+                transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
               }}
             >
               <div
@@ -114,21 +114,37 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
               >
                 <ShoppingBag className="h-12 w-12 text-amber-500" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2"
-                style={{ animation: "fadeIn 0.5s ease-out forwards", animationDelay: "0.1s", opacity: 0 }}>
+              <h3
+                className="text-lg font-semibold text-gray-900 mb-2"
+                style={{
+                  animation: "fadeIn 0.5s ease-out forwards",
+                  animationDelay: "0.1s",
+                  opacity: 0,
+                }}
+              >
                 Votre panier est vide
               </h3>
-              <p className="text-gray-600 mb-6"
-                style={{ animation: "fadeIn 0.5s ease-out forwards", animationDelay: "0.2s", opacity: 0 }}>
+              <p
+                className="text-gray-600 mb-6"
+                style={{
+                  animation: "fadeIn 0.5s ease-out forwards",
+                  animationDelay: "0.2s",
+                  opacity: 0,
+                }}
+              >
                 Commencez à ajouter des produits naturels à votre panier
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white 
+                className="px-6 py-3 bg-linear-to-r from-amber-500 to-amber-600 text-white 
                          font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 
                          transition-all duration-300 shadow-md hover:shadow-lg
                          hover:scale-105 active:scale-95"
-                style={{ animation: "fadeIn 0.5s ease-out forwards", animationDelay: "0.3s", opacity: 0 }}
+                style={{
+                  animation: "fadeIn 0.5s ease-out forwards",
+                  animationDelay: "0.3s",
+                  opacity: 0,
+                }}
               >
                 Continuer mes achats
               </button>
@@ -146,12 +162,14 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                       animation: "slideInRight 0.3s ease-out forwards",
                       opacity: 0,
                       animationDelay: `${index * 0.05}s`,
-                      animationFillMode: "forwards"
+                      animationFillMode: "forwards",
                     }}
                   >
                     {/* Image avec effet de zoom */}
-                    <div className="relative h-16 w-16 rounded overflow-hidden flex-shrink-0
-                                   group-hover:scale-105 transition-transform duration-300">
+                    <div
+                      className="relative h-16 w-16 rounded overflow-hidden flex-shrink-0
+                                   group-hover:scale-105 transition-transform duration-300"
+                    >
                       <Image
                         src={item.product.image}
                         alt={item.product.name}
@@ -177,15 +195,22 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                       </div>
 
                       <div className="flex justify-between items-center mt-2">
-                        <div className="text-sm font-bold text-amber-600"
-                          style={{ animation: "pulseOnce 0.5s ease-in-out" }}>
-                          {(item.product.price * item.quantity).toLocaleString()} FCFA
+                        <div
+                          className="text-sm font-bold text-amber-600"
+                          style={{ animation: "pulseOnce 0.5s ease-in-out" }}
+                        >
+                          {(
+                            item.product.price * item.quantity
+                          ).toLocaleString()}{" "}
+                          FCFA
                         </div>
 
                         {/* Sélecteur quantité avec animations */}
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity - 1)
+                            }
                             className="h-6 w-6 rounded-full border flex items-center justify-center 
                                      hover:bg-gray-100 transition-all duration-200
                                      hover:scale-110 active:scale-95"
@@ -194,8 +219,10 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                             <Minus className="h-3 w-3" />
                           </button>
 
-                          <span className="text-sm font-medium w-6 text-center"
-                            style={{ animation: "bounceIn 0.5s ease-out" }}>
+                          <span
+                            className="text-sm font-medium w-6 text-center"
+                            style={{ animation: "bounceIn 0.5s ease-out" }}
+                          >
                             {item.quantity}
                           </span>
 
@@ -220,12 +247,15 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
               </div>
 
               {/* Bouton vider le panier avec animation */}
-              <div className="px-4" style={{
-                animation: "fadeIn 0.5s ease-out forwards",
-                animationDelay: "0.3s",
-                opacity: 0,
-                animationFillMode: "forwards"
-              }}>
+              <div
+                className="px-4"
+                style={{
+                  animation: "fadeIn 0.5s ease-out forwards",
+                  animationDelay: "0.3s",
+                  opacity: 0,
+                  animationFillMode: "forwards",
+                }}
+              >
                 <button
                   onClick={clearCart}
                   className="w-full py-2.5 text-red-600 font-medium border border-red-200 
@@ -247,42 +277,59 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
               animation: "fadeIn 0.5s ease-out forwards",
               animationDelay: "0.4s",
               opacity: 0,
-              animationFillMode: "forwards"
+              animationFillMode: "forwards",
             }}
           >
             {/* Résumé avec animation des montants */}
             <div className="space-y-2 mb-4">
-              <div className="flex justify-between text-sm" style={{
-                animation: "slideUp 0.4s ease-out forwards",
-                animationDelay: "0.45s",
-                opacity: 0,
-                animationFillMode: "forwards"
-              }}>
+              <div
+                className="flex justify-between text-sm"
+                style={{
+                  animation: "slideUp 0.4s ease-out forwards",
+                  animationDelay: "0.45s",
+                  opacity: 0,
+                  animationFillMode: "forwards",
+                }}
+              >
                 <span className="text-gray-600">Sous-total</span>
-                <span className="font-medium" style={{ animation: "countUp 0.6s ease-out" }}>
+                <span
+                  className="font-medium"
+                  style={{ animation: "countUp 0.6s ease-out" }}
+                >
                   {subtotal.toLocaleString()} FCFA
                 </span>
               </div>
 
-              <div className="flex justify-between text-sm" style={{
-                animation: "slideUp 0.4s ease-out forwards",
-                animationDelay: "0.5s",
-                opacity: 0,
-                animationFillMode: "forwards"
-              }}>
+              <div
+                className="flex justify-between text-sm"
+                style={{
+                  animation: "slideUp 0.4s ease-out forwards",
+                  animationDelay: "0.5s",
+                  opacity: 0,
+                  animationFillMode: "forwards",
+                }}
+              >
                 <span className="text-gray-600">Livraison</span>
-                <span className="font-medium text-emerald-600">Calculée à l'étape suivante</span>
+                <span className="font-medium text-emerald-600">
+                  Calculée à l'étape suivante
+                </span>
               </div>
 
-              <div className="border-t border-gray-200 pt-2 mt-2" style={{
-                animation: "slideUp 0.4s ease-out forwards",
-                animationDelay: "0.55s",
-                opacity: 0,
-                animationFillMode: "forwards"
-              }}>
+              <div
+                className="border-t border-gray-200 pt-2 mt-2"
+                style={{
+                  animation: "slideUp 0.4s ease-out forwards",
+                  animationDelay: "0.55s",
+                  opacity: 0,
+                  animationFillMode: "forwards",
+                }}
+              >
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-900">Total</span>
-                  <span className="text-xl font-bold text-amber-600" style={{ animation: "pulseOnce 0.5s ease-in-out" }}>
+                  <span
+                    className="text-xl font-bold text-amber-600"
+                    style={{ animation: "pulseOnce 0.5s ease-in-out" }}
+                  >
                     {getTotal().toLocaleString()} FCFA
                   </span>
                 </div>
@@ -294,7 +341,7 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
               <Link
                 href="/panier"
                 onClick={onClose}
-                className="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 
+                className="block w-full py-3 bg-linear-to-r from-amber-500 to-amber-600 
                          text-white font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 
                          transition-all duration-300 shadow-md text-center
                          hover:shadow-lg hover:scale-105 active:scale-95"
@@ -302,7 +349,7 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                   animation: "slideUp 0.4s ease-out forwards",
                   animationDelay: "0.6s",
                   opacity: 0,
-                  animationFillMode: "forwards"
+                  animationFillMode: "forwards",
                 }}
               >
                 Voir le panier complet
@@ -312,7 +359,7 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                 href="/checkout"
                 onClick={onClose}
                 className="flex items-center justify-center gap-2 w-full py-3 
-                         bg-gradient-to-r from-green-500 to-emerald-500 text-white 
+                         bg-linear-to-r from-green-500 to-emerald-500 text-white 
                          font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 
                          transition-all duration-300 shadow-md
                          hover:shadow-lg hover:scale-105 active:scale-95"
@@ -320,11 +367,14 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                   animation: "slideUp 0.4s ease-out forwards",
                   animationDelay: "0.65s",
                   opacity: 0,
-                  animationFillMode: "forwards"
+                  animationFillMode: "forwards",
                 }}
               >
                 <span>Passer commande</span>
-                <ArrowRight className="h-4 w-4" style={{ animation: "bounceRight 1s infinite" }} />
+                <ArrowRight
+                  className="h-4 w-4"
+                  style={{ animation: "bounceRight 1s infinite" }}
+                />
               </Link>
 
               <button
@@ -336,7 +386,7 @@ export default function CartSlider({ isOpen, onClose }: CartSliderProps) {
                   animation: "slideUp 0.4s ease-out forwards",
                   animationDelay: "0.7s",
                   opacity: 0,
-                  animationFillMode: "forwards"
+                  animationFillMode: "forwards",
                 }}
               >
                 Continuer mes achats

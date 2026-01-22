@@ -60,7 +60,7 @@ export default function CartModal({ modalId }: CartModalProps) {
   const handleClearCart = () => {
     if (
       window.confirm(
-        "Êtes-vous sûr de vouloir vider votre panier ? Cette action est irréversible."
+        "Êtes-vous sûr de vouloir vider votre panier ? Cette action est irréversible.",
       )
     ) {
       clearCart();
@@ -98,7 +98,7 @@ export default function CartModal({ modalId }: CartModalProps) {
             className="
               absolute -top-1 -right-1
               w-5 h-5
-              bg-gradient-to-r from-orange-500 to-amber-500
+              bg-linear-to-r from-orange-500 to-amber-500
               text-white text-xs font-bold
               rounded-full flex items-center justify-center
             "
@@ -152,7 +152,7 @@ export default function CartModal({ modalId }: CartModalProps) {
                   </p>
                   <button
                     onClick={closeModal}
-                    className="btn bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
+                    className="btn bg-linear-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
                   >
                     Découvrir les produits
                   </button>
@@ -218,7 +218,7 @@ export default function CartModal({ modalId }: CartModalProps) {
                   </button>
                   <button
                     onClick={handleCheckout}
-                    className="btn bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
+                    className="btn bg-linear-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600"
                   >
                     Commander
                   </button>

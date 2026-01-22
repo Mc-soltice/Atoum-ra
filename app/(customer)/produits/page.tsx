@@ -15,7 +15,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function ProductsPage() {
   // ================= ÉTATS =================
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+  const [filteredProducts, setFilteredProducts] =
+    useState<Product[]>(mockProducts);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("default");
@@ -24,10 +25,10 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
 
   // ================= CATÉGORIES UNIQUES =================
-  const categories = Array.from(new Set(mockProducts.map(p => p.category)));
-  const categoryCounts = categories.map(category => ({
+  const categories = Array.from(new Set(mockProducts.map((p) => p.category)));
+  const categoryCounts = categories.map((category) => ({
     name: category,
-    count: mockProducts.filter(p => p.category === category).length
+    count: mockProducts.filter((p) => p.category === category).length,
   }));
 
   // ================= FILTRAGE =================
@@ -39,17 +40,18 @@ export default function ProductsPage() {
     // Filtre par recherche
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(product =>
-        product.name.toLowerCase().includes(query) ||
-        product.description.toLowerCase().includes(query) ||
-        product.category.toLowerCase().includes(query)
+      result = result.filter(
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.description.toLowerCase().includes(query) ||
+          product.category.toLowerCase().includes(query),
       );
     }
 
     // Filtre par catégories
     if (selectedCategories.length > 0) {
-      result = result.filter(product =>
-        selectedCategories.includes(product.category)
+      result = result.filter((product) =>
+        selectedCategories.includes(product.category),
       );
     }
 
@@ -88,10 +90,10 @@ export default function ProductsPage() {
 
   // ================= HANDLERS =================
   const handleCategoryToggle = (category: string) => {
-    setSelectedCategories(prev =>
+    setSelectedCategories((prev) =>
       prev.includes(category)
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+        ? prev.filter((c) => c !== category)
+        : [...prev, category],
     );
   };
 
@@ -127,8 +129,10 @@ export default function ProductsPage() {
               <Filter className="h-4 w-4" />
               <span className="font-medium">Filtres</span>
               {selectedCategories.length > 0 && (
-                <span className="ml-1 bg-white text-amber-600 text-xs font-bold 
-                               rounded-full h-5 w-5 flex items-center justify-center">
+                <span
+                  className="ml-1 bg-white text-amber-600 text-xs font-bold 
+                               rounded-full h-5 w-5 flex items-center justify-center"
+                >
                   {selectedCategories.length}
                 </span>
               )}
@@ -137,18 +141,29 @@ export default function ProductsPage() {
             {/* Bouton panier mobile */}
             <button
               onClick={openCartSlider}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg
+              className="flex items-center gap-2 px-4 py-2.5 bg-linear-to-r from-amber-500 to-amber-600 text-white rounded-lg
                        hover:from-amber-600 hover:to-amber-700 transition-colors shadow-sm"
             >
-              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                />
               </svg>
               <span className="font-medium">Voir panier</span>
             </button>
 
             {/* Résultats mobile */}
             <div className="text-sm text-gray-600">
-              {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
+              {filteredProducts.length} produit
+              {filteredProducts.length > 1 ? "s" : ""}
             </div>
           </div>
         </div>
@@ -163,7 +178,9 @@ export default function ProductsPage() {
               {/* En-tête filtres */}
               <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Filtres</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Filtres
+                  </h2>
                   {selectedCategories.length > 0 && (
                     <button
                       onClick={handleClearFilters}
@@ -176,13 +193,17 @@ export default function ProductsPage() {
 
                 {/* Stats */}
                 <div className="text-sm text-gray-600 mb-4">
-                  <p>{filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} sur {mockProducts.length}</p>
+                  <p>
+                    {filteredProducts.length} produit
+                    {filteredProducts.length > 1 ? "s" : ""} sur{" "}
+                    {mockProducts.length}
+                  </p>
                 </div>
 
                 {/* Bouton panier desktop */}
                 <button
                   onClick={openCartSlider}
-                  className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white 
+                  className="w-full py-2.5 bg-linear-to-r from-amber-500 to-amber-600 text-white 
                            font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 
                            transition-colors shadow-sm mt-3"
                 >
@@ -230,7 +251,7 @@ export default function ProductsPage() {
                     { value: "price-asc", label: "Prix croissant" },
                     { value: "price-desc", label: "Prix décroissant" },
                     { value: "name-asc", label: "Nom A-Z" },
-                    { value: "name-desc", label: "Nom Z-A" }
+                    { value: "name-desc", label: "Nom Z-A" },
                   ].map((option) => (
                     <label
                       key={option.value}
@@ -255,9 +276,11 @@ export default function ProductsPage() {
               {/* Aperçu catégories sélectionnées */}
               {selectedCategories.length > 0 && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <h4 className="font-medium text-amber-900 mb-2">Catégories sélectionnées :</h4>
+                  <h4 className="font-medium text-amber-900 mb-2">
+                    Catégories sélectionnées :
+                  </h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedCategories.map(category => (
+                    {selectedCategories.map((category) => (
                       <span
                         key={category}
                         className="inline-flex items-center gap-1 bg-amber-100 text-amber-800 
@@ -288,7 +311,9 @@ export default function ProductsPage() {
                   Tous les produits
                 </h2>
                 <p className="text-gray-600 text-sm mt-1">
-                  {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''} disponible{filteredProducts.length > 1 ? 's' : ''}
+                  {filteredProducts.length} produit
+                  {filteredProducts.length > 1 ? "s" : ""} disponible
+                  {filteredProducts.length > 1 ? "s" : ""}
                 </p>
               </div>
 
@@ -308,12 +333,22 @@ export default function ProductsPage() {
 
                 <button
                   onClick={openCartSlider}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 
+                  className="flex items-center gap-2 px-4 py-2 bg-linear-to-r from-amber-500 to-amber-600 
                            text-white rounded-lg hover:from-amber-600 hover:to-amber-700 
                            transition-colors shadow-sm"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                   <span className="font-medium">Panier</span>
                 </button>
@@ -355,7 +390,7 @@ export default function ProductsPage() {
                 </p>
                 <button
                   onClick={handleClearFilters}
-                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white 
+                  className="px-6 py-3 bg-linear-to-r from-amber-500 to-amber-600 text-white 
                            font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 
                            transition-all shadow-md hover:shadow-lg"
                 >
@@ -368,7 +403,9 @@ export default function ProductsPage() {
       </div>
 
       {/* ================= MODAL FILTRES MOBILE ================= */}
-      <div className={`lg:hidden fixed inset-0 z-50 ${isMobileFiltersOpen ? 'block' : 'hidden'}`}>
+      <div
+        className={`lg:hidden fixed inset-0 z-50 ${isMobileFiltersOpen ? "block" : "hidden"}`}
+      >
         {/* Overlay */}
         <div
           className="absolute inset-0 bg-black/50"
@@ -427,7 +464,7 @@ export default function ProductsPage() {
                     { value: "price-asc", label: "Prix croissant" },
                     { value: "price-desc", label: "Prix décroissant" },
                     { value: "name-asc", label: "Nom A-Z" },
-                    { value: "name-desc", label: "Nom Z-A" }
+                    { value: "name-desc", label: "Nom Z-A" },
                   ].map((option) => (
                     <label
                       key={option.value}
@@ -461,7 +498,7 @@ export default function ProductsPage() {
               </button>
               <button
                 onClick={() => setIsMobileFiltersOpen(false)}
-                className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 
+                className="w-full py-2.5 bg-linear-to-r from-amber-500 to-amber-600 
                          text-white font-medium rounded-lg hover:from-amber-600 
                          hover:to-amber-700 transition-colors"
               >
@@ -473,10 +510,7 @@ export default function ProductsPage() {
       </div>
 
       {/* ================= SLIDER DU PANIER ================= */}
-      <CartSlider
-        isOpen={isCartSliderOpen}
-        onClose={closeCartSlider}
-      />
+      <CartSlider isOpen={isCartSliderOpen} onClose={closeCartSlider} />
     </div>
   );
 }

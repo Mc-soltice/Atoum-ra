@@ -15,9 +15,9 @@ export default function CartPage() {
   const { items, getTotalItems, clearCart } = useCart();
 
   // Transformez les items du contexte en format attendu par CartItemsList
-  const cartItems = items.map(item => ({
+  const cartItems = items.map((item) => ({
     product: item.product,
-    quantity: item.quantity
+    quantity: item.quantity,
   }));
 
   const handleClearCart = () => {
@@ -39,7 +39,7 @@ export default function CartPage() {
           <Breadcrumbs items={breadcrumbs} />
         </div>
 
-        <div className="w-full bg-gradient-to-r from-amber-400 to-amber-600 text-white flex items-center justify-between px-6 py-4 mb-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300">
+        <div className="w-full bg-linear-to-r from-amber-400 to-amber-600 text-white flex items-center justify-between px-6 py-4 mb-6 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300">
           <div className="flex items-center gap-3">
             <div>
               <h2 className="text-2xl font-bold text-white sm:text-3xl">
@@ -69,8 +69,18 @@ export default function CartPage() {
               {items.length === 0 && (
                 <div className="bg-white rounded-xl p-8 text-center border border-gray-200">
                   <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg
+                      className="w-10 h-10 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">

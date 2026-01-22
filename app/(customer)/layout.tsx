@@ -9,7 +9,12 @@ export const metadata = {
     template: "%s | Atoum-ra",
   },
   description: "Atoum-ra propose des produits naturels africains de qualité.",
-  keywords: ["produits naturels", "bien-être", "plantes africaines", "Atoum-ra"],
+  keywords: [
+    "produits naturels",
+    "bien-être",
+    "plantes africaines",
+    "Atoum-ra",
+  ],
   openGraph: {
     title: "Atoum-ra",
     description: "Produits naturels authentiques",

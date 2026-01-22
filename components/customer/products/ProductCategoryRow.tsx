@@ -116,7 +116,7 @@ export default function CategorieRow({
     <section className="w-full py-6 px-4 md:px-8 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto">
         {/* Bannière de catégorie */}
-        <div className="w-full bg-gradient-to-r from-[#F29820] to-[#F2B820] text-white flex items-center justify-between px-4 py-3 mb-6 rounded-lg">
+        <div className="w-full bg-linear-to-r from-[#F29820] to-[#F2B820] text-white flex items-center justify-between px-4 py-3 mb-6 rounded-lg">
           <div className="flex items-center space-x-4">
             <div className="h-8 w-1 bg-white rounded-full" />
             <div className="flex flex-col md:flex-row md:items-center md:space-x-4">
@@ -182,10 +182,7 @@ export default function CategorieRow({
               }
 
               return (
-                <div
-                  key={product.id}
-                  className={`snap-start ${widthClass}`}
-                >
+                <div key={product.id} className={`snap-start ${widthClass}`}>
                   <ProductCard product={product} onCartClick={onCartClick} />
                 </div>
               );
@@ -224,10 +221,11 @@ export default function CategorieRow({
                     });
                   }
                 }}
-                className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex
-                    ? "w-6 bg-gradient-to-r from-[#F29820] to-[#F2B820]"
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? "w-6 bg-linear-to-r from-[#F29820] to-[#F2B820]"
                     : "w-2 bg-gray-300 hover:bg-gray-400"
-                  }`}
+                }`}
                 aria-label={`Position ${index + 1}`}
               />
             ))}
