@@ -31,6 +31,9 @@ export default function EditProductModal({
   // ✅ Utilisation du contexte Product
   const { updateProduct, loading: contextLoading } = useProducts();
 
+  // Etat pour controller la fermeture differee
+  const [shouldClose, setShouldClose] = useState(false);
+
   // ✅ États
   const [initialData, setInitialData] = useState<UpdateProductPayload | null>(
     null,
@@ -348,6 +351,8 @@ export default function EditProductModal({
       setIsSubmitting(true);
       await updateProduct(product.id, changedFields);
 
+      setShouldClose(true);
+
       // Réinitialisation
       setMainImagePreview(null);
       setGalleryPreviews([]);
@@ -364,6 +369,17 @@ export default function EditProductModal({
     }
   };
 
+  // gestion de la fermeture differee
+  useEffect(() => {
+    if (!shouldClose) return;
+
+    const timer = setTimeout(() => {
+      onClose();
+      setShouldClose(false);
+    }, 1200); // ⏱️ durée de ton animation
+
+    return () => clearTimeout(timer);
+  }, [shouldClose, onClose]);
   if (!product || !isOpen) return null;
 
   const isLoading = contextLoading || isSubmitting || categoriesLoading;

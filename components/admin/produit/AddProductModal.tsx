@@ -45,6 +45,9 @@ export default function AddProductModal({
     images: [],
   };
 
+  // Etat pour controller la fermeture differee
+  const [shouldClose, setShouldClose] = useState(false);
+
   const [form, setForm] = useState<CreateProductPayload>(initialForm);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
@@ -267,6 +270,8 @@ export default function AddProductModal({
     try {
       await createProduct(form);
 
+      setShouldClose(true);
+
       // Réinitialisation
       setForm(initialForm);
       setMainImagePreview(null);
@@ -290,6 +295,18 @@ export default function AddProductModal({
       // ✅ REMOVED: L'erreur est déjà gérée par le contexte
     }
   };
+
+  // gestion de la fermeture differee
+  useEffect(() => {
+    if (!shouldClose) return;
+
+    const timer = setTimeout(() => {
+      onClose();
+      setShouldClose(false);
+    }, 1200); // ⏱️ durée de ton animation
+
+    return () => clearTimeout(timer);
+  }, [shouldClose, onClose]);
 
   if (!isOpen) return null;
 
