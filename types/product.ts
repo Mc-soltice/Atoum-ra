@@ -5,7 +5,7 @@ import type { Category } from "./category";
  */
 export interface Product {
   /** Identifiant unique */
-  id: number;
+  id: string;
 
   /** Nom du produit */
   name: string;
@@ -38,7 +38,7 @@ export interface Product {
   benefits: string[];
 
   /** Mode d'utilisation */
-  usage: string | null;
+  usage_instructions: string | null;
 
   /** Stock disponible */
   stock: number;
@@ -71,16 +71,10 @@ export interface CreateProductPayload {
   description?: string;
   ingredients?: string[];
   benefits?: string[];
-  usage?: string;
+  usage_instructions?: string;
   stock: number;
   is_promotional?: boolean;
   promo_end_date?: string;
-}
-
-/**
- * Payload mise à jour produit
- */
-export interface UpdateProductPayload extends Partial<CreateProductPayload> {
   main_image?: File;
   images?: File[];
 }
@@ -90,4 +84,17 @@ export interface UpdateProductPayload extends Partial<CreateProductPayload> {
  */
 export interface UpdateStockPayload {
   stock: number;
+}
+
+/**
+ * Payload mise à jour produit
+ */
+export interface UpdateProductPayload extends Partial<CreateProductPayload> {
+  existing_gallery?: string[]; // Pour garder les images existantes lors de l'update
+}
+
+export interface ProductFilters {
+  search?: string;
+  stock_status?: "En stock" | "Stock faible" | "Rupture";
+  is_promotional?: "Promo" | "Standard";
 }

@@ -158,7 +158,9 @@ export default function ProductClient({ product }: ProductClientProps) {
         </div>
 
         {/* Caractéristiques */}
-        {(product.ingredients || product.benefits || product.usage) && (
+        {(product.ingredients ||
+          product.benefits ||
+          product.usage_instructions) && (
           <div className="rounded-lg p-4 border border-emerald-100">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Détails
@@ -181,10 +183,12 @@ export default function ProductClient({ product }: ProductClientProps) {
               </div>
             )}
 
-            {product.usage && (
+            {product.usage_instructions && (
               <div className="flex items-center text-gray-700 mt-3 pt-3 border-t border-emerald-100">
                 <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-3"></span>
-                <span className="text-sm">Prise: {product.usage}</span>
+                <span className="text-sm">
+                  Prise: {product.usage_instructions}
+                </span>
               </div>
             )}
           </div>
@@ -252,7 +256,7 @@ export default function ProductClient({ product }: ProductClientProps) {
               )}
 
               {/* Mode d'utilisation */}
-              {product.usage && (
+              {product.usage_instructions && (
                 <>
                   <div className="divider lg:divider-horizontal" />
                   <div className="flex-1">
@@ -260,7 +264,7 @@ export default function ProductClient({ product }: ProductClientProps) {
                       Mode d'utilisation
                     </h3>
                     <p className="text-sm text-gray-700 leading-relaxed">
-                      {product.usage}
+                      {product.usage_instructions}
                     </p>
                   </div>
                 </>

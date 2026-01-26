@@ -1,19 +1,35 @@
-import React, { useState } from "react";
+"use client";
+
+import { useProducts } from "@/contexte/ProductContext";
+import { categoryService } from "@/services/cat.service";
 import type { Category } from "@/types/category";
-import type { Product, CreateProductPayload } from "@/types/product";
+import type { CreateProductPayload } from "@/types/product";
+import { DotSpinner } from "ldrs/react";
+import "ldrs/react/DotSpinner.css";
+import { Save, Upload, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 interface AddProductModalProps {
-  categories: Category[];
+  isOpen: boolean;
   onClose: () => void;
-  onProductAdded: (product: Product) => void;
+  onProductAdded?: () => void; // ✅ Changé: optionnel et sans argument
+  categories: Category[];
 }
 
-const AddProductModal: React.FC<AddProductModalProps> = ({
-  categories,
+/**
+ * Modal pour ajouter un nouveau produit
+ */
+export default function AddProductModal({
+  isOpen,
   onClose,
   onProductAdded,
-}) => {
-  const [form, setForm] = useState<CreateProductPayload>({
+}: AddProductModalProps) {
+  // ✅ Utilisation du contexte Product
+  const { createProduct, loading: contextLoading } = useProducts();
+
+  // ✅ État initial du formulaire
+  const initialForm: CreateProductPayload = {
     name: "",
     category_id: 0,
     price: 0,
@@ -21,429 +37,629 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     description: "",
     ingredients: [],
     benefits: [],
-    usage: "",
+    usage_instructions: "",
     stock: 0,
     is_promotional: false,
     promo_end_date: "",
-  });
+    main_image: undefined,
+    images: [],
+  };
 
-  const [images, setImages] = useState<File[]>([]);
-  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [form, setForm] = useState<CreateProductPayload>(initialForm);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [isPromotional, setIsPromotional] = useState(false);
 
-  /* -------------------- handlers -------------------- */
+  // États pour les images
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
 
+  // États séparés pour l'affichage des inputs
+  const [ingredientsInput, setIngredientsInput] = useState("");
+  const [benefitsInput, setBenefitsInput] = useState("");
+
+  // Références pour les inputs files
+  const mainImageInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // ✅ Charge les catégories au montage
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const data = await categoryService.getAll();
+        setCategories(data);
+        if (data.length > 0) {
+          setForm((prev) => ({ ...prev, category_id: data[0].id }));
+        }
+      } catch (err) {
+        console.error("Erreur chargement catégories:", err);
+        toast.error("Erreur lors du chargement des catégories");
+        setCategories([]);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      fetchCategories();
+    }
+  }, [isOpen]);
+
+  // ✅ Nettoyer les previews quand le modal se ferme
+  useEffect(() => {
+    if (!isOpen) {
+      setMainImagePreview(null);
+      setGalleryPreviews([]);
+      setIngredientsInput("");
+      setBenefitsInput("");
+    }
+  }, [isOpen]);
+
+  // ✅ Gère les changements dans les champs du formulaire
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
   ) => {
-    const target = e.target as HTMLInputElement;
-    const { name, value, type, checked } = target;
+    const { name, value, type } = e.target;
+
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setIsPromotional(checked);
+      setForm((prev) => ({
+        ...prev,
+        [name]: checked,
+        original_price: checked ? prev.price : null,
+      }));
+    } else if (type === "number") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value === "" ? "" : Number(value),
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  // ✅ Gère les tableaux (ingrédients, bienfaits) - version améliorée
+  const handleIngredientsChange = (value: string) => {
+    setIngredientsInput(value);
+
+    // Convertir en tableau seulement si on a au moins un élément valide
+    const items = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
 
     setForm((prev) => ({
       ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : type === "number"
-            ? Number(value)
-            : value,
+      ingredients: items,
     }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setImages((prev) => [...prev, ...newFiles]);
+  const handleBenefitsChange = (value: string) => {
+    setBenefitsInput(value);
+
+    const items = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+    setForm((prev) => ({
+      ...prev,
+      benefits: items,
+    }));
+  };
+
+  // ✅ Gestion de l'image principale
+  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validation du type de fichier
+      if (!file.type.startsWith("image/")) {
+        toast.error("Veuillez sélectionner une image valide");
+        return;
+      }
+
+      // Validation de la taille (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("L'image ne doit pas dépasser 5MB");
+        return;
+      }
+
+      setForm((prev) => ({ ...prev, main_image: file }));
+
+      // Créer une preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMainImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleMainImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setMainImage(e.target.files[0]);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
+  // ✅ Supprimer l'image principale
   const removeMainImage = () => {
-    setMainImage(null);
+    setForm((prev) => ({ ...prev, main_image: undefined }));
+    setMainImagePreview(null);
+    if (mainImageInputRef.current) {
+      mainImageInputRef.current.value = "";
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ Gestion de la galerie d'images
+  const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    // Validation
+    const validFiles: File[] = [];
+    const newPreviews: string[] = [];
+
+    files.forEach((file) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name} n'est pas une image valide`);
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} est trop volumineux (max 5MB)`);
+        return;
+      }
+
+      validFiles.push(file);
+
+      // Créer preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        newPreviews.push(reader.result as string);
+        if (newPreviews.length === validFiles.length) {
+          setGalleryPreviews((prev) => [...prev, ...newPreviews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setForm((prev) => ({
+      ...prev,
+      images: [...(prev.images || []), ...validFiles],
+    }));
+  };
+
+  // ✅ Supprimer une image de la galerie
+  const removeGalleryImage = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      images: (prev.images || []).filter((_, i) => i !== index),
+    }));
+    setGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ✅ Soumission du formulaire
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation
     if (form.category_id === 0) {
-      alert("Veuillez sélectionner une catégorie");
+      toast.error("Veuillez sélectionner une catégorie");
       return;
     }
 
-    const category =
-      categories.find((cat) => cat.id === form.category_id) || null;
+    if (form.price <= 0) {
+      toast.error("Le prix doit être supérieur à 0");
+      return;
+    }
 
-    // Calcul du pourcentage de réduction
-    const discount_percentage =
-      form.original_price && form.original_price > form.price
-        ? Math.round(
-            ((form.original_price - form.price) / form.original_price) * 100,
-          )
-        : undefined;
+    if (form.stock < 0) {
+      toast.error("Le stock ne peut pas être négatif");
+      return;
+    }
 
-    // Générer des URLs d'images temporaires
-    const galleryUrls = images.map(
-      (_, index) => `/uploads/product-gallery-${Date.now()}-${index}.jpg`,
-    );
-    const mainImageUrl = mainImage
-      ? `/uploads/product-main-${Date.now()}.jpg`
-      : "/placeholder.png";
+    // Validation de l'image principale
+    if (!form.main_image) {
+      toast.error("Veuillez sélectionner une image principale");
+      return;
+    }
 
-    const newProduct: Product = {
-      id: Date.now(),
-      name: form.name,
-      category,
-      price: Number(form.price),
-      original_price: form.original_price,
-      discount_percentage,
-      main_image: mainImageUrl,
-      gallery: galleryUrls,
-      description: form.description || null,
-      ingredients: form.ingredients || [],
-      benefits: form.benefits || [],
-      usage: form.usage || null,
-      stock: Number(form.stock),
-      is_promotional: form.is_promotional || false,
-      is_on_promotion: form.is_promotional || false,
-      promo_end_date:
-        form.is_promotional && form.promo_end_date ? form.promo_end_date : null,
-      is_stock_low: Number(form.stock) > 0 && Number(form.stock) < 5,
-      is_out_of_stock: Number(form.stock) === 0,
-    };
+    try {
+      await createProduct(form);
 
-    // Dans une vraie app, ici vous enverriez les fichiers au backend
-    console.log("Main image:", mainImage);
-    console.log("Gallery images:", images);
+      // Réinitialisation
+      setForm(initialForm);
+      setMainImagePreview(null);
+      setGalleryPreviews([]);
+      setIsPromotional(false);
+      setIngredientsInput("");
+      setBenefitsInput("");
 
-    onProductAdded(newProduct);
-    onClose();
+      if (mainImageInputRef.current) mainImageInputRef.current.value = "";
+      if (galleryInputRef.current) galleryInputRef.current.value = "";
+
+      // Appeler le callback si fourni
+      if (onProductAdded) {
+        onProductAdded();
+      }
+
+      onClose();
+      // ✅ REMOVED: Le toast est déjà géré par le contexte createProduct
+    } catch (error) {
+      console.error("Erreur lors de la création :", error);
+      // ✅ REMOVED: L'erreur est déjà gérée par le contexte
+    }
   };
 
-  /* -------------------- UI -------------------- */
+  if (!isOpen) return null;
+
+  const isLoading = contextLoading || categoriesLoading;
 
   return (
-    <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-9"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] flex flex-col "
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-              <legend className="fieldset-legend">
-                <h2 className="font-bold text-lg">Ajouter un produit</h2>
-              </legend>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Layout en deux colonnes */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Colonne de gauche */}
-                  <div className="space-y-4">
-                    {/* Informations de base */}
-                    <div className="space-y-3">
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        placeholder="Nom du produit"
-                        className="input w-full rounded-lg focus:ring-2 focus:ring-gray-300 outline-none focus:border-transparent"
-                        required
-                      />
+    <div className="modal modal-open" role="dialog" aria-modal="true">
+      <div className="modal-box max-w-5xl">
+        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+          <legend className="fieldset-legend">
+            <h2 className="font-bold text-lg">Ajouter un produit</h2>
+          </legend>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Nom du produit */}
+              <label className="floating-label w-full">
+                <span>Nom du produit *</span>
+                <input
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Nom du produit"
+                  className="input input-bordered outline-none rounded-lg w-full"
+                  required
+                  aria-required="true"
+                  disabled={isLoading}
+                />
+              </label>
 
-                      <select
-                        name="category_id"
-                        value={form.category_id}
-                        onChange={handleChange}
-                        className="select w-full rounded-lg focus:ring-2 focus:ring-gray-300 outline-none focus:border-transparent"
-                        required
-                      >
-                        <option value={0} disabled>
-                          Sélectionner une catégorie
-                        </option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.name}
-                          </option>
-                        ))}
-                      </select>
-
-                      <textarea
-                        name="description"
-                        value={form.description}
-                        onChange={handleChange}
-                        placeholder="Description"
-                        className="textarea w-full rounded-lg focus:ring-2 focus:ring-gray-300 outline-none focus:border-transparent"
-                        rows={3}
-                      />
-                    </div>
-
-                    {/* Prix et stock */}
-                    <div className="space-y-3">
-                      <input
-                        type="number"
-                        name="price"
-                        value={form.price}
-                        onChange={handleChange}
-                        placeholder="Prix"
-                        className="input w-full rounded-lg focus:ring-2 focus:ring-gray-300 outline-none focus:border-transparent"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-
-                      <input
-                        type="number"
-                        name="stock"
-                        value={form.stock}
-                        onChange={handleChange}
-                        placeholder="Stock"
-                        className="input w-full rounded-lg focus:ring-2 outline-none focus:ring-gray-300 focus:border-transparent"
-                        required
-                        min="0"
-                      />
-                    </div>
-
-                    {/* Promotion */}
-                    <div className="space-y-3">
-                      <label className="flex items-center gap-2 p-3  bg-gray-50 rounded-lg">
-                        <input
-                          type="checkbox"
-                          name="is_promotional"
-                          checked={form.is_promotional}
-                          onChange={handleChange}
-                          className="checkbox rounded"
-                        />
-                        <span className="font-medium">
-                          Produit en promotion
-                        </span>
-                      </label>
-
-                      {form.is_promotional && (
-                        <div className="space-y-3">
-                          <input
-                            type="number"
-                            name="original_price"
-                            value={form.original_price || ""}
-                            onChange={handleChange}
-                            placeholder="Prix original"
-                            className="input w-full rounded-lg focus:ring-2 outline-none focus:ring-gray-300 focus:border-transparent"
-                            min="0"
-                            step="0.01"
-                          />
-
-                          <input
-                            type="date"
-                            name="promo_end_date"
-                            value={form.promo_end_date}
-                            onChange={handleChange}
-                            className="input w-full rounded-lg focus:ring-2 outline-none focus:ring-gray-300 focus:border-transparent"
-                            required={form.is_promotional}
-                          />
-                        </div>
-                      )}
-                    </div>
+              {/* Catégorie */}
+              <label className="floating-label w-full">
+                <span>Catégorie *</span>
+                <select
+                  name="category_id"
+                  value={form.category_id}
+                  onChange={handleChange}
+                  className="select select-bordered outline-none rounded-lg w-full"
+                  required
+                  aria-required="true"
+                  disabled={isLoading || categories.length === 0}
+                >
+                  <option value="">Sélectionner une catégorie</option>
+                  {categoriesLoading ? (
+                    <option value="" disabled>
+                      Chargement des catégories...
+                    </option>
+                  ) : categories.length === 0 ? (
+                    <option value="" disabled>
+                      Aucune catégorie disponible
+                    </option>
+                  ) : (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {categoriesLoading && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    Chargement des catégories...
                   </div>
-
-                  {/* Colonne de droite */}
-                  <div className="space-y-4">
-                    {/* Upload d'images */}
-                    <div className="space-y-3">
-                      <div className="space-y-2">
-                        <label className="block font-medium">
-                          Image principale
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
-                          {mainImage ? (
-                            <div className="flex items-center justify-between">
-                              <span className="truncate">{mainImage.name}</span>
-                              <button
-                                type="button"
-                                onClick={removeMainImage}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                Supprimer
-                              </button>
-                            </div>
-                          ) : (
-                            <>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleMainImageUpload}
-                                className="hidden"
-                                id="mainImageUpload"
-                              />
-                              <label
-                                htmlFor="mainImageUpload"
-                                className="cursor-pointer block"
-                              >
-                                <div className="text-gray-500">
-                                  <svg
-                                    className="w-8 h-8 mx-auto mb-2"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                    />
-                                  </svg>
-                                  <span>Cliquez pour uploader</span>
-                                </div>
-                              </label>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block font-medium">
-                          Galerie d&apos;images
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-gray-400 transition-colors">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            multiple
-                            className="hidden"
-                            id="galleryUpload"
-                          />
-                          <label
-                            htmlFor="galleryUpload"
-                            className="cursor-pointer block"
-                          >
-                            <div className="text-gray-500">
-                              <svg
-                                className="w-8 h-8 mx-auto mb-2"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                />
-                              </svg>
-                              <span>Cliquez pour ajouter des images</span>
-                            </div>
-                          </label>
-                        </div>
-
-                        {/* Liste des images de la galerie */}
-                        {images.length > 0 && (
-                          <div className="mt-3 space-y-2">
-                            {images.map((file, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
-                              >
-                                <span className="truncate text-sm">
-                                  {file.name}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeImage(index)}
-                                  className="text-red-500 hover:text-red-700 text-sm"
-                                >
-                                  Supprimer
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Ingrédients et bienfaits */}
-                    <div className="space-y-3">
-                      <textarea
-                        name="ingredients"
-                        value={(form.ingredients || []).join(", ")}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            ingredients: e.target.value
-                              .split(",")
-                              .map((item) => item.trim())
-                              .filter((item) => item),
-                          }))
-                        }
-                        placeholder="Ingrédients (séparés par des virgules)"
-                        className="outline-none textarea w-full rounded-lg focus:ring-2 focus:ring-gray-300 focus:border-transparent"
-                        rows={3}
-                      />
-
-                      <textarea
-                        name="benefits"
-                        value={(form.benefits || []).join(", ")}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            benefits: e.target.value
-                              .split(",")
-                              .map((item) => item.trim())
-                              .filter((item) => item),
-                          }))
-                        }
-                        placeholder="Bienfaits (séparés par des virgules)"
-                        className=" outline-none textarea w-full rounded-lg focus:ring-2 focus:ring-gray-300 focus:border-transparent"
-                        rows={3}
-                      />
-                    </div>
-
-                    {/* Mode d'utilisation */}
-                    <div>
-                      <textarea
-                        name="usage"
-                        value={form.usage}
-                        onChange={handleChange}
-                        placeholder="Mode d'utilisation"
-                        className="outline-none textarea w-full rounded-lg focus:ring-2 focus:ring-gray-300 focus:border-transparent"
-                        rows={3}
-                      />
-                    </div>
+                )}
+                {!categoriesLoading && categories.length === 0 && (
+                  <div className="text-xs text-red-500 mt-1">
+                    Aucune catégorie disponible. Veuillez d&apos;abord créer une
+                    catégorie.
                   </div>
+                )}
+              </label>
+
+              {/* Prix */}
+              <label className="floating-label w-full">
+                <span>Prix (€) *</span>
+                <input
+                  type="number"
+                  name="price"
+                  value={form.price}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  className="input input-bordered outline-none rounded-lg w-full"
+                  required
+                  aria-required="true"
+                  disabled={isLoading}
+                />
+              </label>
+
+              {/* Stock */}
+              <label className="floating-label w-full">
+                <span>Stock *</span>
+                <input
+                  type="number"
+                  name="stock"
+                  value={form.stock}
+                  onChange={handleChange}
+                  placeholder="0"
+                  min="0"
+                  className="input input-bordered outline-none rounded-lg w-full"
+                  required
+                  aria-required="true"
+                  disabled={isLoading}
+                />
+              </label>
+
+              {/* Produit promotionnel */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="is_promotional"
+                  checked={isPromotional}
+                  onChange={handleChange}
+                  className="checkbox"
+                  id="promotional-checkbox"
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="promotional-checkbox"
+                  className="cursor-pointer"
+                >
+                  Produit promotionnel
+                </label>
+              </div>
+
+              {/* Prix original (si promo) */}
+              {isPromotional && (
+                <label className="floating-label w-full">
+                  <span>Prix original (€)</span>
+                  <input
+                    type="number"
+                    name="original_price"
+                    value={form.original_price || ""}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    className="input input-bordered outline-none rounded-lg w-full"
+                    disabled={isLoading}
+                  />
+                </label>
+              )}
+
+              {/* Date fin promo */}
+              {isPromotional && (
+                <label className="floating-label w-full">
+                  <span>Date fin promotion</span>
+                  <input
+                    type="date"
+                    name="promo_end_date"
+                    value={form.promo_end_date || ""}
+                    onChange={handleChange}
+                    className="input input-bordered outline-none rounded-lg w-full"
+                    disabled={isLoading}
+                  />
+                </label>
+              )}
+            </div>
+
+            {/* Image principale */}
+            <div className="space-y-2">
+              <label className="block">
+                <span>Image principale *</span>
+                <div className="mt-1">
+                  <input
+                    type="file"
+                    ref={mainImageInputRef}
+                    onChange={handleMainImageChange}
+                    accept="image/*"
+                    className="hidden"
+                    id="main-image-input"
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="main-image-input"
+                    className={`cursor-pointer flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg transition-colors ${
+                      isLoading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:border-gray-400"
+                    }`}
+                  >
+                    <Upload className="h-5 w-5 mr-2" />
+                    Sélectionner une image
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Formats supportés: JPG, PNG, WEBP. Max: 5MB
+                  </p>
                 </div>
-              </form>
-            </fieldset>
-          </div>
+              </label>
 
-          {/* Boutons d'action */}
-          <div className="flex justify-end gap-3 p-3">
-                            <button type="button" className="btn" onClick={onClose} >
-                  Annuler
-                </button>
+              {/* Preview image principale */}
+              {mainImagePreview && (
+                <div className="relative w-40 h-40 mt-2">
+                  <img
+                    src={mainImagePreview}
+                    alt="Preview image principale"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeMainImage}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 disabled:opacity-50"
+                    disabled={isLoading}
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
 
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="px-6 py-2 rounded-lg font-medium text-white bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 transition-all"
-            >
-              Ajouter le produit
-            </button>
-          </div>
-        </div>
+            {/* Galerie d'images */}
+            <div className="space-y-2">
+              <label className="block">
+                <span>Galerie d&apos;images</span>
+                <div className="mt-1">
+                  <input
+                    type="file"
+                    ref={galleryInputRef}
+                    onChange={handleGalleryChange}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    id="gallery-input"
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="gallery-input"
+                    className={`cursor-pointer flex items-center justify-center px-4 py-2 border-2 border-dashed border-gray-300 rounded-lg transition-colors ${
+                      isLoading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:border-gray-400"
+                    }`}
+                  >
+                    <Upload className="h-5 w-5 mr-2" />
+                    Ajouter des images à la galerie
+                  </label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Vous pouvez sélectionner plusieurs images
+                  </p>
+                </div>
+              </label>
+
+              {/* Previews galerie */}
+              {galleryPreviews.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {galleryPreviews.map((preview, index) => (
+                    <div key={index} className="relative w-full h-24">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 disabled:opacity-50"
+                        disabled={isLoading}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Description */}
+            <label className="floating-label w-full">
+              <span>Description</span>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                placeholder="Description du produit"
+                className="textarea textarea-bordered outline-none rounded-lg w-full"
+                rows={3}
+                disabled={isLoading}
+              />
+            </label>
+
+            {/* Ingrédients */}
+            <label className="floating-label w-full">
+              <span>Ingrédients (séparés par des virgules)</span>
+              <input
+                type="text"
+                value={ingredientsInput}
+                onChange={(e) => handleIngredientsChange(e.target.value)}
+                onBlur={() => {
+                  // Nettoyer les espaces en trop quand on quitte le champ
+                  const cleaned = ingredientsInput
+                    .split(",")
+                    .map((item) => item.trim())
+                    .filter((item) => item.length > 0)
+                    .join(", ");
+                  setIngredientsInput(cleaned);
+                }}
+                placeholder="Ingrédient 1, Ingrédient 2, ..."
+                className="input input-bordered outline-none rounded-lg w-full"
+                disabled={isLoading}
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                Saisissez vos ingrédients séparés par des virgules
+              </div>
+            </label>
+
+            {/* Bienfaits */}
+            <label className="floating-label w-full">
+              <span>Bienfaits (séparés par des virgules)</span>
+              <input
+                type="text"
+                value={benefitsInput}
+                onChange={(e) => handleBenefitsChange(e.target.value)}
+                onBlur={() => {
+                  const cleaned = benefitsInput
+                    .split(",")
+                    .map((item) => item.trim())
+                    .filter((item) => item.length > 0)
+                    .join(", ");
+                  setBenefitsInput(cleaned);
+                }}
+                placeholder="Bienfait 1, Bienfait 2, ..."
+                className="input input-bordered outline-none rounded-lg w-full"
+                disabled={isLoading}
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                Saisissez les bienfaits séparés par des virgules
+              </div>
+            </label>
+
+            {/* Mode d'utilisation */}
+            <label className="floating-label w-full">
+              <span>Mode d&apos;utilisation</span>
+              <textarea
+                name="usage_instructions"
+                value={form.usage_instructions}
+                onChange={handleChange}
+                placeholder="Instructions d'utilisation"
+                className="textarea textarea-bordered outline-none rounded-lg w-full"
+                rows={2}
+                disabled={isLoading}
+              />
+            </label>
+
+            <div className="modal-action">
+              <button
+                type="submit"
+                className="rounded-lg btn mb-4 text-white bg-slate-800 disabled:opacity-50"
+                disabled={
+                  isLoading || categories.length === 0 || !form.main_image
+                }
+              >
+                {contextLoading ? (
+                  <DotSpinner size="20" speed="0.9" color="white" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {contextLoading ? "Création..." : "Ajouter"}
+              </button>
+              <button
+                type="button"
+                className="btn rounded-lg disabled:opacity-50"
+                onClick={onClose}
+                disabled={contextLoading}
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
+        </fieldset>
       </div>
     </div>
   );
-};
-
-export default AddProductModal;
+}

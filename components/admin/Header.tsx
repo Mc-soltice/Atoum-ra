@@ -18,11 +18,13 @@ import {
   Menu,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuthContext } from "@/contexte/AuthContext";
 
 export default function Header() {
   const pathname = usePathname();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { user, logout } = useAuthContext();
 
   /**
    * Détermine le titre à afficher dans le header
@@ -148,8 +150,10 @@ export default function Header() {
               <User className="w-4 h-4" />
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-gray-500">Administrateur</p>
+              <p className="text-sm font-medium">
+                {user?.first_name || user?.email?.split("@")[0] || "Mon compte"}
+              </p>
+              <p className="text-xs text-gray-500"> {user?.roles}</p>
             </div>
             <ChevronDown className="w-4 h-4 text-gray-500" />
           </button>
@@ -158,8 +162,10 @@ export default function Header() {
           {isUserMenuOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-2">
               <div className="px-4 py-3 border-b border-gray-100">
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-gray-500">admin@exemple.com</p>
+                <p className="text-sm font-medium">
+                  {user?.first_name} {user?.last_name}
+                </p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
               </div>
 
               <button className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-50">
@@ -174,7 +180,10 @@ export default function Header() {
 
               <div className="border-t border-gray-100 my-1"></div>
 
-              <button className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+              <button
+                onClick={logout}
+                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+              >
                 <LogOut className="w-4 h-4" />
                 Se déconnecter
               </button>

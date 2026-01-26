@@ -1,78 +1,141 @@
+"use client";
+
 import { useState, useEffect } from "react";
+import { Save } from "lucide-react";
+import "ldrs/react/DotSpinner.css";
+import { DotSpinner } from "ldrs/react";
+import { useCategories } from "@/contexte/CategoryContext";
 import type { Category, UpdateCategoryPayload } from "@/types/category";
 
 interface EditCategoryModalProps {
   isOpen: boolean;
   category: Category | null;
   onClose: () => void;
-  onCategoryUpdated: (cat: Category) => void;
 }
 
+/**
+ * Modal pour éditer une catégorie existante
+ * Utilise le contexte Category pour les opérations
+ */
 export default function EditCategoryModal({
   isOpen,
   category,
   onClose,
-  onCategoryUpdated,
 }: EditCategoryModalProps) {
-  const [form, setForm] = useState<UpdateCategoryPayload>({});
+  // ✅ Utilise le contexte Category
+  const { updateCategory } = useCategories();
 
+  // ✅ État du formulaire
+  const [form, setForm] = useState<UpdateCategoryPayload>({});
+  const [loading, setLoading] = useState(false);
+
+  // ✅ Initialise le formulaire avec les données de la catégorie
   useEffect(() => {
     if (category) {
-      setForm({ name: category.name, description: category.description });
+      setForm({
+        name: category.name,
+        description: category.description,
+      });
     }
   }, [category]);
 
+  // ✅ Gère les changements dans les champs du formulaire
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ✅ Soumission du formulaire
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!category) return;
-    // TODO : PATCH /categories/{id}
-    onCategoryUpdated({
-      ...category,
-      ...form,
-      updated_at: new Date().toISOString(),
-    });
-    onClose();
+
+    // ✅ Vérifie si des modifications ont été apportées
+    const hasChanges =
+      form.name !== category.name || form.description !== category.description;
+
+    if (!hasChanges) {
+      console.log("Aucune modification détectée");
+      onClose();
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // ✅ Utilise la fonction du contexte
+      await updateCategory(category.id, form);
+      onClose();
+    } catch (err) {
+      console.error("Erreur lors de la mise à jour :", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!isOpen || !category) return null;
+  if (!category || !isOpen) return null;
 
   return (
     <div className="modal modal-open" role="dialog" aria-modal="true">
       <div className="modal-box">
-        <h2 className="font-bold text-lg mb-4">Éditer la catégorie</h2>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            name="name"
-            value={form.name || ""}
-            onChange={handleChange}
-            className="input input-bordered w-full"
-            placeholder="Nom"
-            required
-          />
-          <textarea
-            name="description"
-            value={form.description || ""}
-            onChange={handleChange}
-            className="textarea textarea-bordered w-full"
-            placeholder="Description"
-            required
-          />
-          <div className="modal-action">
-            <button type="submit" className="btn btn-primary">
-              Enregistrer
-            </button>
-            <button type="button" className="btn" onClick={onClose}>
-              Annuler
-            </button>
-          </div>
-        </form>
+        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+          <legend className="fieldset-legend">
+            <h2 className="font-bold text-lg">Éditer la catégorie</h2>
+          </legend>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <label className="floating-label w-full">
+              <span>Nom de la catégorie</span>
+              <input
+                name="name"
+                value={form.name || category.name}
+                onChange={handleChange}
+                placeholder="Nom de la catégorie"
+                className="input input-bordered outline-none rounded-lg w-full"
+                required
+              />
+            </label>
+
+            <label className="floating-label w-full">
+              <span>Description</span>
+              <textarea
+                name="description"
+                value={form.description || category.description}
+                onChange={handleChange}
+                placeholder="Description de la catégorie"
+                className="textarea textarea-bordered outline-none rounded-lg w-full"
+                rows={3}
+                required
+              />
+            </label>
+
+            <div className="modal-action">
+              <button
+                type="submit"
+                className="rounded-lg btn mb-4 text-white bg-slate-800"
+                disabled={loading}
+              >
+                {loading ? (
+                  <DotSpinner size="20" speed="0.9" color="white" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                {loading ? "Mise à jour..." : "Mettre à jour"}
+              </button>
+              <button
+                type="button"
+                className="btn rounded-lg"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Annuler
+              </button>
+            </div>
+          </form>
+        </fieldset>
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ export default function AddUserModal({
   onClose,
   onUserAdded,
 }: AddUserModalProps) {
-  const [form, setForm] = useState<CreateUserPayload>({
+  const initialForm: CreateUserPayload = {
     first_name: "",
     last_name: "",
     phone: "",
@@ -35,8 +35,9 @@ export default function AddUserModal({
     role: "",
     password: "",
     password_confirmation: "",
-  });
-  const ROLES = ["client"];
+  };
+
+  const [form, setForm] = useState<CreateUserPayload>(initialForm);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -47,12 +48,15 @@ export default function AddUserModal({
       [name]: value,
     }));
   };
+
+  const ROLES = ["client"];
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); // 🔹 start loading
     try {
+      setLoading(true); // 🔹 start loading
       const newUser = await userService.create(form);
       onUserAdded(newUser);
       onClose();
@@ -174,9 +178,8 @@ export default function AddUserModal({
                 type="submit"
                 className="rounded-lg btn mb-4 text-white bg-slate-800"
               >
-                <Save className="h-4 w-4" />
                 {loading ? (
-                  <DotSpinner size="40" speed="0.9" color="black" />
+                  <DotSpinner size="20" speed="0.9" color="black" />
                 ) : (
                   <Save className="h-4 w-4" />
                 )}
